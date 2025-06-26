@@ -1,0 +1,108 @@
+Eres un experto en creación de contenido educativo. Genera el contenido completo para el Módulo {{ module_number }} del curso.
+
+Información del Curso:
+- Título: {{ course_metadata.title }}
+- Nivel: {{ course_metadata.level }}
+- Descripción: {{ course_metadata.description }}
+
+Módulo a Generar:
+- Número: {{ module_number }}
+- Título: {{ module_title }}
+- Posición en el curso: {{ module_number }} de {{ course_metadata.total_modules }}
+
+Genera contenido que siga esta estructura EXACTA:
+
+{
+    "module_id": "modulo_{{ module_number }}",
+    "title": "{{ module_title }}",
+    "description": "Descripción detallada del módulo (mínimo 150 palabras)",
+    "objective": "Al finalizar este módulo, el estudiante será capaz de...",
+    "concepts": ["Concepto 1", "Concepto 2", "Concepto 3", "Concepto 4"],
+    "chunks": [
+        {
+            "chunk_id": "modulo_{{ module_number }}_chunk_1",
+            "content": "📖 **Concepto:** [Título del concepto]\\n\\n[Contenido educativo extenso de al menos 400 palabras explicando el concepto paso a paso. Usar markdown para formato. Incluir ejemplos prácticos y analogías.]\\n\\n**Ejemplo Práctico:**\\n[Ejemplo detallado]\\n\\n**Puntos Clave:**\\n- Punto 1\\n- Punto 2\\n- Punto 3",
+            "total_chunks": 6,
+            "chunk_order": 1,
+            "checksum": "md5hash123",
+            "video_search_query": "tutorial específico para buscar en YouTube"
+        },
+        {
+            "chunk_id": "modulo_{{ module_number }}_chunk_2",
+            "content": "🛠️ **Práctica:** [Título de la práctica]\\n\\n[Contenido práctico paso a paso de al menos 350 palabras. Incluir instrucciones claras y ejemplos.]",
+            "total_chunks": 6,
+            "chunk_order": 2,
+            "checksum": "md5hash456",
+            "video_search_query": "práctica específica para YouTube"
+        },
+        {
+            "chunk_id": "modulo_{{ module_number }}_chunk_3",
+            "content": "🎯 **Aplicación:** [Título de aplicación]\\n\\n[Contenido aplicado de al menos 350 palabras]",
+            "total_chunks": 6,
+            "chunk_order": 3,
+            "checksum": "md5hash789",
+            "video_search_query": "aplicación práctica específica"
+        },
+        {
+            "chunk_id": "modulo_{{ module_number }}_chunk_4",
+            "content": "🔍 **Análisis:** [Título de análisis]\\n\\n[Análisis profundo de al menos 350 palabras]",
+            "total_chunks": 6,
+            "chunk_order": 4,
+            "checksum": "md5hash012",
+            "video_search_query": "análisis específico del tema"
+        },
+        {
+            "chunk_id": "modulo_{{ module_number }}_chunk_5",
+            "content": "💡 **Casos de Uso:** [Título de casos]\\n\\n[Casos de uso reales de al menos 300 palabras]",
+            "total_chunks": 6,
+            "chunk_order": 5,
+            "checksum": "md5hash345",
+            "video_search_query": "casos de uso prácticos"
+        },
+        {
+            "chunk_id": "modulo_{{ module_number }}_chunk_6",
+            "content": "🎉 **Síntesis:** [Título de síntesis]\\n\\n[Resumen y conexiones de al menos 250 palabras]",
+            "total_chunks": 6,
+            "chunk_order": 6,
+            "checksum": "md5hash678",
+            "video_search_query": "resumen y síntesis del tema"
+        }
+    ],
+    "quiz": [
+        {
+            "question": "Pregunta conceptual específica sobre el módulo",
+            "options": ["Opción A", "Opción B", "Opción C", "Opción D"],
+            "correct_answer": 2,
+            "explanation": "Explicación detallada de por qué esta respuesta es correcta"
+        },
+        {
+            "question": "Pregunta práctica sobre aplicación",
+            "options": ["Opción A", "Opción B", "Opción C", "Opción D"],
+            "correct_answer": 1,
+            "explanation": "Explicación detallada"
+        }
+    ],
+    "summary": "Resumen completo del módulo de al menos 200 palabras explicando qué se aprendió y cómo se conecta con el resto del curso",
+    "practical_exercise": {
+        "title": "Ejercicio Práctico del Módulo {{ module_number }}",
+        "description": "Descripción detallada del ejercicio práctico",
+        "steps": ["Paso 1", "Paso 2", "Paso 3", "Paso 4"],
+        "expected_output": "Descripción del resultado esperado"
+    },
+    "resources": {
+        "downloads": ["recurso1.pdf", "cheatsheet.pdf"],
+        "external_links": ["https://ejemplo1.com", "https://ejemplo2.com"],
+        "additional_videos": ["video_id_1", "video_id_2"]
+    }
+}
+
+INSTRUCCIONES CRÍTICAS:
+1. Cada chunk debe tener contenido EXTENSO (mínimo 300-400 palabras)
+2. El contenido debe ser educativo, práctico y apropiado para nivel {{ course_metadata.level }}
+3. Usar formato markdown para mejor legibilidad
+4. Los video_search_query deben ser específicos y en español
+5. Las preguntas del quiz deben evaluar comprensión real
+6. Todo debe estar alineado con el objetivo del módulo
+7. El contenido debe ser progresivo desde conceptos básicos hasta aplicación
+
+Responde ÚNICAMENTE con el JSON, sin explicaciones adicionales. 

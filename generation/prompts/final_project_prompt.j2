@@ -1,0 +1,28 @@
+Eres un experto en diseño de proyectos educativos finales. Genera un proyecto final completo y práctico para el curso.
+
+Información del Curso:
+- Título: {{ course_metadata.title }}
+- Nivel: {{ course_metadata.level }}
+- Descripción: {{ course_metadata.description }}
+- Módulos del curso: {{ course_metadata.module_list|join(", ") }}
+
+Genera un proyecto final que integre todos los conceptos aprendidos:
+
+{
+    "title": "Título específico del proyecto final que integre el tema principal",
+    "description": "Descripción completa del proyecto final de al menos 300 palabras. Debe explicar qué van a construir, por qué es importante, qué habilidades aplicarán y cómo se conecta con el mundo real.",
+    "requirements": [
+        "Requisito técnico 1 específico",
+        "Requisito técnico 2 específico", 
+        "Requisito técnico 3 específico",
+        "Requisito de presentación"
+    ],
+    "steps": "Guía paso a paso DETALLADA de al menos 500 palabras explicando exactamente cómo completar el proyecto.",
+    "deliverables": [
+        "Entregable principal específico",
+        "Documentación técnica",
+        "Presentación de resultados"
+    ]
+}
+
+Responde ÚNICAMENTE con el JSON, sin explicaciones adicionales. 

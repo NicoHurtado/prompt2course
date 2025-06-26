@@ -1,0 +1,44 @@
+# Django and DRF
+Django==5.2.1
+djangorestframework==3.15.2
+django-cors-headers==4.5.0
+django-environ==0.11.2
+
+# Database
+psycopg2-binary==2.9.9
+
+# AI Services
+anthropic==0.36.1
+
+# AWS Services
+boto3==1.35.45
+botocore==1.35.45
+
+# YouTube API
+google-api-python-client==2.148.0
+
+# Async processing
+celery==5.4.0
+redis==5.1.1
+
+# Templates
+Jinja2==3.1.4
+MarkupSafe==2.1.5
+
+# Utilities
+python-decouple==3.8
+uuid==1.30
+asyncio==3.4.3
+
+# Development
+django-debug-toolbar==4.4.6
+
+# Production server
+gunicorn==23.0.0
+
+# File handling
+Pillow==10.4.0
+
+# HTTP client
+httpx==0.27.2
+aiohttp==3.10.10 
