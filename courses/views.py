@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 from .models import Course, Module, UserProgress
+from django.urls import reverse
 
 
 def index(request):
@@ -59,6 +60,10 @@ def course_view(request, course_id):
     context = {
         'course': course,
         'user_progress': user_progress,
+        'breadcrumbs': [
+            (reverse('index'), 'Inicio'),
+            (None, course.title),
+        ],
     }
     return render(request, 'course.html', context)
 
@@ -108,6 +113,11 @@ def module_view(request, course_id, module_id):
         'previous_module': previous_module,
         'next_module': next_module,
         'user_progress': user_progress,
+        'breadcrumbs': [
+            (reverse('index'), 'Inicio'),
+            (reverse('course_view', kwargs={'course_id': course.id}), course.title),
+            (None, module.title),
+        ],
     }
     return render(request, 'module.html', context)
 

@@ -144,7 +144,50 @@
         .copy-code-btn:hover {
             opacity: 1;
         }
+
+        /* --- Colores personalizados para highlight.js --- */
+        .markdown-body .hljs-keyword,
+        .markdown-body .hljs-built_in,
+        .markdown-body .hljs-title {
+            color: #15803d; /* verde */
+        }
+
+        .markdown-body .hljs-string {
+            color: #d97706; /* naranja */
+        }
+
+        .markdown-body .hljs-number,
+        .markdown-body .hljs-literal {
+            color: #2563eb; /* azul principal */
+        }
+
+        /* Algunos lenguajes marcan paréntesis como 'punctuation' u 'operator' */
+        .markdown-body .hljs-punctuation,
+        .markdown-body .hljs-operator {
+            color: #2563eb;
+        }
+
+        .markdown-body a.p2c-link {
+            color: #1d4ed8;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .markdown-body a.p2c-link:hover {
+            color: #2563eb;
+        }
+
+        /* Inline code (backticks) to highlight filenames/commands */
+        .markdown-body code:not(pre code) {
+            color: #b91c1c; /* rojo oscuro */
+            background-color: #fef2f2;
+            padding: 0.15em 0.35em;
+            border-radius: 4px;
+            font-weight: 600;
+        }
     </style>
+    
+    <!-- animate.css CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-b7L7DknhfO14PtkL+Qr+tzKUrPsziEtGlUZEM6I72vGU+mLjXmJvLC+OtJk9gQ11wPp+cX2GZQJcUwHzt+8qdw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -176,12 +219,26 @@
                         </a>
                     </li>
                 </ul>
+                <span class="navbar-text ms-lg-3 d-none d-lg-inline" id="greeting"></span>
             </div>
         </div>
     </nav>
 
     <!-- Contenido principal -->
     <main class="container my-4">
+        {% if breadcrumbs %}
+        <nav aria-label="breadcrumb" class="mb-3 animate__animated animate__fadeInDown">
+            <ol class="breadcrumb">
+                {% for crumb in breadcrumbs %}
+                    {% if forloop.last or not crumb.0 %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ crumb.1 }}</li>
+                    {% else %}
+                        <li class="breadcrumb-item"><a href="{{ crumb.0 }}">{{ crumb.1 }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
 
@@ -279,14 +336,63 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Inicializar highlight.js
             if (window.hljs) {
-                hljs.highlightAll();
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+
+            // Greeting with stored name
+            const storedName = localStorage.getItem('p2c_name');
+            const greetingSpan = document.getElementById('greeting');
+            if (storedName && greetingSpan) {
+                greetingSpan.textContent = `Hola, ${storedName}!`;
+            }
+
+            // Mostrar modal para pedir nombre si no existe
+            if (!storedName) {
+                showNameModal();
+            }
+
+            function showNameModal() {
+                const modalHtml = `
+                <div class="modal fade" id="nameModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">¡Bienvenido a P2C!</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p>¿Cómo te llamas?</p>
+                                <input type="text" id="nameInput" class="form-control" placeholder="Tu nombre">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" id="saveNameBtn">Guardar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                const nameModal = new bootstrap.Modal(document.getElementById('nameModal'));
+                nameModal.show();
+
+                document.getElementById('saveNameBtn').addEventListener('click', () => {
+                    const name = document.getElementById('nameInput').value.trim();
+                    if (name) {
+                        localStorage.setItem('p2c_name', name);
+                        greetingSpan.textContent = `Hola, ${name}!`;
+                        nameModal.hide();
+                    } else {
+                        alert('Por favor ingresa tu nombre');
+                    }
+                });
             }
 
             // Añadir botón de copia a cada bloque de código
             document.querySelectorAll('pre code').forEach((codeBlock) => {
                 const pre = codeBlock.parentElement;
-                pre.style.position = 'relative';
+                if (pre.querySelector('.copy-code-btn')) return; // evitar duplicados
 
+                pre.style.position = 'relative';
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'btn btn-light btn-sm position-absolute copy-code-btn';
                 copyBtn.style.top = '8px';
@@ -295,34 +401,12 @@
 
                 copyBtn.addEventListener('click', () => {
                     const codeText = codeBlock.innerText;
-
-                    // Intentar API moderna primero
                     if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(codeText).then(() => {
-                            showToast('Código copiado', 'success');
-                        }).catch(() => fallbackCopy(codeText));
+                        navigator.clipboard.writeText(codeText).then(() => showToast('Código copiado', 'success')).catch(() => fallbackCopy(codeText));
                     } else {
                         fallbackCopy(codeText);
                     }
                 });
-
-                function fallbackCopy(text) {
-                    // Crea textarea oculto para seleccionar
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    textarea.style.position = 'fixed';
-                    textarea.style.top = '-9999px';
-                    document.body.appendChild(textarea);
-                    textarea.focus();
-                    textarea.select();
-                    try {
-                        document.execCommand('copy');
-                        showToast('Código copiado', 'success');
-                    } catch (err) {
-                        showToast('No se pudo copiar', 'danger');
-                    }
-                    document.body.removeChild(textarea);
-                }
 
                 pre.appendChild(copyBtn);
             });

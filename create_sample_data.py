@@ -27,10 +27,11 @@ def create_sample_course():
         title="Programación en Python desde Cero",
         description="Un curso completo para aprender Python desde los conceptos más básicos hasta proyectos prácticos. Perfecto para principiantes que quieren adentrarse en el mundo de la programación.",
         prerequisites=["Conocimientos básicos de computación", "Ganas de aprender", "Tiempo para practicar"],
-        total_modules=4,
+        total_modules=5,
         module_list=[
             "Introducción y Configuración del Entorno",
             "Variables, Tipos de Datos y Operadores",
+            "Condicionales en Python",
             "Estructuras de Control y Funciones",
             "Proyecto Final: Calculadora Avanzada"
         ],
@@ -395,6 +396,58 @@ print(f"Año de nacimiento: {año_nacimiento}")
 - Crear output atractivo
 
 Este es solo el comienzo de tu aventura en Python. En el próximo módulo aprenderemos sobre diferentes tipos de datos y operaciones más avanzadas."""
+                },
+                {
+                    "title": "Hola Mundo: tu primer script Python",
+                    "content": """Es momento de escribir y ejecutar tu **primer programa real**.
+
+1. Abre `mi_curso_python/modulo_1/hola_mundo.py` en tu editor.
+
+```python
+print(\"Hola, mundo!\")
+```
+
+2. Ejecuta el archivo:
+
+```bash
+python hola_mundo.py
+```
+
+**Salida esperada:**
+
+```text
+Hola, mundo!
+```
+
+¡Felicidades! Has corrido tu primer script.
+"""
+                },
+                {
+                    "title": "Operadores aritméticos y uso práctico",
+                    "content": """Trabajar con números es esencial. Repasemos los **operadores aritméticos** más usados.
+
+| Operador | Descripción | Ejemplo | Resultado |
+|----------|-------------|---------|-----------|
+| `+` | Suma | `3 + 2` | `5` |
+| `-` | Resta | `5 - 1` | `4` |
+| `*` | Multiplicación | `4 * 2` | `8` |
+| `/` | División | `10 / 4` | `2.5` |
+| `//` | División entera | `10 // 4` | `2` |
+| `%` | Módulo (resto) | `10 % 4` | `2` |
+| `**` | Potencia | `2 ** 3` | `8` |
+
+**Mini-reto:** Crea `calculadora_basica.py` y pide dos números al usuario. Luego muestra la suma, resta, multiplicación y división.
+
+```python
+num1 = float(input("Primer número: "))
+num2 = float(input("Segundo número: "))
+
+print(f"Suma: {num1 + num2}")
+print(f"Resta: {num1 - num2}")
+print(f"Multiplicación: {num1 * num2}")
+print(f"División: {num1 / num2}")
+```
+"""
                 }
             ]
         },
@@ -584,6 +637,74 @@ print(f"Nombre formateado: {nombre_limpio}")
 print(f"Iniciales: {iniciales}")
 print(f"Longitud: {len(nombre_limpio)} caracteres")
 ```"""
+                }
+            ]
+        },
+        {
+            "title": "Condicionales en Python",
+            "description": "Aprende a tomar decisiones en tus programas usando if, elif y else.",
+            "objective": "Comprender la sintaxis y el flujo de las sentencias condicionales.",
+            "concepts": ["if", "elif", "else", "operadores lógicos"],
+            "chunks": [
+                {
+                    "title": "Sentencias if, elif y else",
+                    "content": """Las **sentencias condicionales** permiten ejecutar código dependiendo de si una condición es *verdadera* o *falsa*.
+
+**Sintaxis básica:**
+```python
+if condicion:
+    # bloque si es verdadero
+elif otra_condicion:
+    # otro bloque
+else:
+    # bloque si todas las condiciones anteriores son falsas
+```
+
+**Ejemplo práctico:**
+```python
+edad = int(input("¿Cuántos años tienes? "))
+
+if edad >= 18:
+    print("Eres mayor de edad")
+elif edad >= 13:
+    print("Eres adolescente")
+else:
+    print("Eres niño")
+```
+
+**Operadores de comparación:**
+- `==` igual a
+- `!=` distinto de
+- `>` mayor que
+- `<` menor que
+- `>=` mayor o igual que
+- `<=` menor o igual que
+
+**Operadores lógicos:**
+- `and`, `or`, `not`
+
+```python
+usuario = "admin"
+password = "1234"
+
+if usuario == "admin" and password == "1234":
+    print("Acceso concedido")
+else:
+    print("Acceso denegado")
+```"""
+                },
+                {
+                    "title": "Operador ternario y buenas prácticas",
+                    "content": """Python permite escribir condicionales compactos con el **operador ternario**.
+
+```python
+mensaje = "Mayor de edad" if edad >= 18 else "Menor de edad"
+```
+
+Usa el ternario para asignaciones simples; para lógicas complejas, usa la forma larga por claridad.
+
+**Reto rápido:** Crea `par_impar.py` que pida un número y muestre `Es par` o `Es impar` usando operador ternario.
+"""
                 }
             ]
         }
