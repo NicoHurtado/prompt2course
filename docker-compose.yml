@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: p2c_web
+    command: ["/entrypoint.sh"]
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  celery:
+    build: .
+    container_name: p2c_celery
+    command: ["/entrypoint.sh", "celery"]
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: p2c_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped 
