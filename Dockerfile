@@ -2,8 +2,8 @@
 FROM python:3.12-slim
 
 # Variables de entorno para evitar prompts y configurar Python
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Instalar dependencias del sistema
 RUN apt-get update && \

@@ -14,6 +14,12 @@
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- GitHub Markdown CSS para estilizar el contenido como en GitHub -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" integrity="sha512-4IBYjVu5pUGvFunw3aZ16JlXiTtPJnF3DwFJ3FynbGy3rmx40vAQM5rK6P+jmsrHcrCT0s9yerMUNSdnRv0f3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- highlight.js para resaltado de sintaxis en bloques de código -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha512-+zfnVmP7Xgkn4HiwUO6+cDEHXT24w2cV5096bzmUiy5JN5KRaHHHkO7KXb7EKTo21xpzu4uhPcXqg4XH/wsjIA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <!-- Estilos personalizados -->
     <style>
         :root {
@@ -178,6 +184,9 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- highlight.js biblioteca de resaltado de sintaxis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-VGCqKqzXx3gsEIkXofMvX9N5zcqiRPJszrKDlL8oQA9unv0BFFMypSxVYU6cRf13ZQMDu1inECPw9lF2ijh3NQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
     <!-- Scripts personalizados -->
     <script>
         // Configuración global de HTMX
@@ -241,6 +250,34 @@
         
         document.addEventListener('htmx:responseError', function(event) {
             showToast('Error de conexión', 'danger');
+        });
+
+        // --- Resaltado de sintaxis y botones de copia ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar highlight.js
+            if (window.hljs) {
+                hljs.highlightAll();
+            }
+
+            // Añadir botón de copia a cada bloque de código
+            document.querySelectorAll('pre code').forEach((codeBlock) => {
+                const pre = codeBlock.parentElement;
+                pre.style.position = 'relative';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn btn-light btn-sm position-absolute copy-code-btn';
+                copyBtn.style.top = '8px';
+                copyBtn.style.right = '8px';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+                        showToast('Código copiado', 'success');
+                    });
+                });
+
+                pre.appendChild(copyBtn);
+            });
         });
     </script>
     

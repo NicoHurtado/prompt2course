@@ -29,6 +29,8 @@ MarkupSafe==2.1.5
 python-decouple==3.8
 uuid==1.30
 asyncio==3.4.3
+Markdown==3.5.2
+Pygments==2.17.2
 
 # Development
 django-debug-toolbar==4.4.6

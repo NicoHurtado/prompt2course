@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load markdown_filters %}
+
 {% block title %}{{ course.title }}{% endblock %}
 
 {% block content %}
@@ -105,8 +107,8 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="chunk-content mb-4">
-                    {{ course.introduction|linebreaks }}
+                <div class="chunk-content markdown-body mb-4">
+                    {{ course.introduction|markdownify }}
                 </div>
                 
                 <!-- Botón Reproduce Intro -->
