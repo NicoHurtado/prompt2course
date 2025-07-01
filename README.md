@@ -127,10 +127,40 @@ El sistema crea automáticamente un curso de ejemplo. La URL exacta aparece en l
 
 ## 🛠️ Comandos Útiles
 
-### Gestión de Contenedores
+### 🚀 **Flujo de Desarrollo - ¿Qué comando usar?**
+
+| Tipo de Cambio | Comando | Cuándo Usarlo |
+|----------------|---------|---------------|
+| **Código Python/HTML/CSS/JS** | `docker-compose up` | Cambios en archivos del proyecto |
+| **requirements.txt** | `docker-compose up --build` | Agregar/quitar dependencias |
+| **Dockerfile** | `docker-compose up --build` | Cambiar configuración de Docker |
+| **docker-compose.yml** | `docker-compose down && docker-compose up` | Cambiar servicios/puertos |
+| **Problemas/Conflictos** | `docker-compose down --remove-orphans && docker-compose up --build` | Errores o contenedores huérfanos |
+
+### 📋 **Comandos Detallados**
+
+#### **Desarrollo Normal**
 ```bash
-# Levantar servicios en segundo plano
+# Primera vez o después de cambios en dependencias
+docker-compose up --build
+
+# Desarrollo diario (cambios en código)
+docker-compose up
+
+# Levantar en segundo plano
 docker-compose up -d
+```
+
+#### **Gestión de Contenedores**
+```bash
+# Detener servicios (mantiene volúmenes)
+docker-compose down
+
+# Detener y eliminar volúmenes (¡CUIDADO: borra la base de datos!)
+docker-compose down -v
+
+# Detener y eliminar contenedores huérfanos
+docker-compose down --remove-orphans
 
 # Ver logs en tiempo real
 docker-compose logs -f
@@ -138,15 +168,9 @@ docker-compose logs -f
 # Ver logs de un servicio específico
 docker-compose logs -f web
 docker-compose logs -f celery
-
-# Detener servicios
-docker-compose down
-
-# Detener y eliminar volúmenes (cuidado: borra la base de datos)
-docker-compose down -v
 ```
 
-### Comandos de Django
+#### **Comandos de Django**
 ```bash
 # Ejecutar comandos de Django dentro del contenedor
 docker-compose exec web python manage.py shell
@@ -154,7 +178,7 @@ docker-compose exec web python manage.py createsuperuser
 docker-compose exec web python manage.py collectstatic
 ```
 
-### Reiniciar Servicios
+#### **Reiniciar Servicios**
 ```bash
 # Reiniciar solo el servicio web
 docker-compose restart web
@@ -162,6 +186,20 @@ docker-compose restart web
 # Reconstruir y reiniciar todo
 docker-compose up --build --force-recreate
 ```
+
+### 🔄 **Guía Rápida de Uso**
+
+#### **Para tu día a día:**
+1. **Primera vez:** `docker-compose up --build`
+2. **Desarrollo normal:** `docker-compose up`
+3. **Si hay problemas:** `docker-compose down --remove-orphans && docker-compose up --build`
+
+#### **¿Por qué estos comandos?**
+
+- **`docker-compose up`**: El código está montado como volumen, los cambios se ven inmediatamente
+- **`docker-compose up --build`**: Reconstruye la imagen cuando cambias dependencias o Dockerfile
+- **`docker-compose down`**: Detiene servicios pero mantiene datos
+- **`--remove-orphans`**: Elimina contenedores viejos de configuraciones anteriores
 
 ## 📁 Estructura del Proyecto
 
