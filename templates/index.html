@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}Prompt2Course - Crea Cursos Inteligentes en Segundos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Hero Section -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                <i class="fas fa-magic me-3"></i>
+                Prompt2Course
+            </h1>
+            <p class="lead text-muted mb-4">
+                Genera cursos educativos completos y estructurados en menos de 10 segundos 
+                usando solo un prompt simple. IA + Audio + Video = Educación Inteligente.
+            </p>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <i class="fas fa-brain fa-2x text-primary mb-2"></i>
+                    <h6>Claude AI</h6>
+                    <small class="text-muted">Contenido inteligente</small>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-volume-up fa-2x text-success mb-2"></i>
+                    <h6>AWS Polly</h6>
+                    <small class="text-muted">Síntesis de voz neural</small>
+                </div>
+                <div class="col-md-4">
+                    <i class="fab fa-youtube fa-2x text-danger mb-2"></i>
+                    <h6>YouTube API</h6>
+                    <small class="text-muted">Videos educativos</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Creación -->
+        <div class="card course-card mb-4">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4">
+                    <i class="fas fa-rocket me-2"></i>
+                    Crear Nuevo Curso
+                </h3>
+                
+                <form id="courseForm" hx-post="/demo-create-course/" hx-target="#result-area" hx-swap="innerHTML">
+                    <!-- Prompt del Usuario -->
+                    <div class="mb-4">
+                        <label for="user_prompt" class="form-label fw-bold">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            ¿Qué quieres aprender?
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="user_prompt" 
+                            name="user_prompt" 
+                            rows="3" 
+                            placeholder="Ejemplo: quiero aprender Machine Learning para analizar datos deportivos"
+                            required
+                            minlength="10"
+                        ></textarea>
+                        <div class="form-text">
+                            Describe específicamente qué quieres aprender. Mínimo 10 caracteres.
+                        </div>
+                    </div>
+
+                    <!-- Nivel de Experiencia -->
+                    <div class="mb-4">
+                        <label for="user_level" class="form-label fw-bold">
+                            <i class="fas fa-chart-line me-1"></i>
+                            Nivel de Experiencia
+                        </label>
+                        <select class="form-select" id="user_level" name="user_level" required>
+                            <option value="">Selecciona tu nivel</option>
+                            <option value="principiante">
+                                <i class="fas fa-seedling"></i>
+                                Principiante - Empezando desde cero
+                            </option>
+                            <option value="intermedio">
+                                <i class="fas fa-tree"></i>
+                                Intermedio - Tengo conocimientos básicos
+                            </option>
+                            <option value="avanzado">
+                                <i class="fas fa-mountain"></i>
+                                Avanzado - Quiero profundizar mis conocimientos
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Intereses (Tags) -->
+                    <div class="mb-4">
+                        <label for="interests" class="form-label fw-bold">
+                            <i class="fas fa-tags me-1"></i>
+                            Tus Intereses (Opcional)
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Tecnología" id="tech">
+                                    <label class="form-check-label" for="tech">Tecnología</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Deportes" id="sports">
+                                    <label class="form-check-label" for="sports">Deportes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Negocios" id="business">
+                                    <label class="form-check-label" for="business">Negocios</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Arte" id="art">
+                                    <label class="form-check-label" for="art">Arte y Diseño</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Ciencia" id="science">
+                                    <label class="form-check-label" for="science">Ciencia</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Salud" id="health">
+                                    <label class="form-check-label" for="health">Salud</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Educación" id="education">
+                                    <label class="form-check-label" for="education">Educación</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Marketing" id="marketing">
+                                    <label class="form-check-label" for="marketing">Marketing</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-text">
+                            Selecciona tus áreas de interés para personalizar el contenido.
+                        </div>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5 py-2">
+                            <i class="fas fa-sparkles me-2"></i>
+                            Generar Curso Inteligente
+                            <span class="htmx-indicator">
+                                <span class="spinner-border spinner-border-sm ms-2" role="status"></span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Área de Resultados -->
+        <div id="result-area">
+            <!-- Aquí se mostrará el progreso y resultado del curso -->
+        </div>
+
+        <!-- Ejemplos de Uso -->
+        <div class="card course-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Ejemplos de Prompts Exitosos
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded mb-3">
+                            <strong>Tecnología:</strong><br>
+                            <em>"Quiero aprender desarrollo web con React para crear aplicaciones modernas"</em>
+                        </div>
+                        <div class="p-3 bg-light rounded mb-3">
+                            <strong>Deportes:</strong><br>
+                            <em>"Necesito entender análisis de datos deportivos para mejorar rendimiento"</em>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded mb-3">
+                            <strong>Negocios:</strong><br>
+                            <em>"Quiero aprender marketing digital para hacer crecer mi empresa"</em>
+                        </div>
+                        <div class="p-3 bg-light rounded mb-3">
+                            <strong>Arte:</strong><br>
+                            <em>"Necesito dominar diseño gráfico con herramientas profesionales"</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Manejar formulario y intereses
+    document.getElementById('courseForm').addEventListener('submit', function(e) {
+        // Recolectar intereses seleccionados
+        const interests = [];
+        document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(checkbox) {
+            interests.push(checkbox.value);
+        });
+        
+        // Crear input hidden para intereses
+        const existingInterests = document.querySelector('input[name="user_interests"]');
+        if (existingInterests) {
+            existingInterests.remove();
+        }
+        
+        const interestsInput = document.createElement('input');
+        interestsInput.type = 'hidden';
+        interestsInput.name = 'user_interests';
+        interestsInput.value = JSON.stringify(interests);
+        this.appendChild(interestsInput);
+    });
+
+    // Manejar respuesta de creación de curso
+    document.addEventListener('htmx:afterRequest', function(event) {
+        if (event.detail.xhr.status === 201) {
+            const response = JSON.parse(event.detail.xhr.responseText);
+            const courseId = response.id;
+            
+            // Mostrar mensaje de éxito y empezar polling
+            document.getElementById('result-area').innerHTML = `
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-check-circle me-2"></i>Curso Creado Exitosamente</h5>
+                    <p>Tu curso está siendo generado. ID: <code>${courseId}</code></p>
+                    <div class="progress mb-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 25%"></div>
+                    </div>
+                    <small>Generando metadata del curso...</small>
+                </div>
+            `;
+            
+            // Empezar polling del estado
+            startPolling(courseId);
+        }
+    });
+
+    function startPolling(courseId) {
+        const pollInterval = setInterval(function() {
+            fetch(`/course/${courseId}/status/`)
+                .then(response => response.json())
+                .then(data => {
+                    updateProgress(data);
+                    
+                    // Detener polling cuando esté listo o completo
+                    if (data.status === 'ready' || data.status === 'complete' || data.status === 'failed') {
+                        clearInterval(pollInterval);
+                        if (data.status === 'ready' || data.status === 'complete') {
+                            showCourseReady(courseId, data);
+                        } else {
+                            showError();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling course status:', error);
+                    clearInterval(pollInterval);
+                    showError();
+                });
+        }, 2000); // Poll cada 2 segundos
+    }
+
+    function updateProgress(data) {
+        let progressPercent = data.progress_percentage || 0;
+        let statusText = getStatusText(data.status);
+        
+        document.getElementById('result-area').innerHTML = `
+            <div class="alert alert-info">
+                <h5><i class="fas fa-cog fa-spin me-2"></i>Generando Curso</h5>
+                <p>Estado: <strong>${statusText}</strong></p>
+                <div class="progress mb-2">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${progressPercent}%"></div>
+                </div>
+                <small>${progressPercent}% completado</small>
+            </div>
+        `;
+    }
+
+    function getStatusText(status) {
+        const statusMap = {
+            'generating_metadata': 'Generando estructura del curso...',
+            'metadata_ready': 'Creando primer módulo...',
+            'generating_module_1': 'Preparando contenido inicial...',
+            'ready': 'Curso listo para empezar',
+            'generating_remaining': 'Completando módulos restantes...',
+            'complete': 'Curso completamente generado',
+            'failed': 'Error en la generación'
+        };
+        return statusMap[status] || status;
+    }
+
+    function showCourseReady(courseId, data) {
+        document.getElementById('result-area').innerHTML = `
+            <div class="alert alert-success">
+                <h5><i class="fas fa-check-circle me-2"></i>¡Curso Listo!</h5>
+                <p><strong>${data.title || 'Tu curso'}</strong> está listo para empezar.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="/course/${courseId}/" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Ver Curso
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="copyToClipboard('${window.location.origin}/course/${courseId}/')">
+                        <i class="fas fa-copy me-2"></i>Copiar Enlace
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function showError() {
+        document.getElementById('result-area').innerHTML = `
+            <div class="alert alert-danger">
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>Error</h5>
+                <p>Hubo un problema generando tu curso. Por favor, inténtalo de nuevo.</p>
+                <button class="btn btn-outline-danger" onclick="location.reload()">
+                    <i class="fas fa-redo me-2"></i>Intentar de Nuevo
+                </button>
+            </div>
+        `;
+    }
+</script>
+{% endblock %} 

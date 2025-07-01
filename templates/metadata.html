@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - Metadata{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Course Header -->
+        <div class="card course-card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h1 class="card-title h2 mb-2">{{ course.title }}</h1>
+                        <span class="badge bg-primary status-badge">{{ course.get_status_display }}</span>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Curso ID: {{ course.course_id }}</small>
+                        <br>
+                        <small class="text-muted">Creado: {{ course.created_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                </div>
+                
+                <p class="card-text">{{ course.description }}</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Nivel</h6>
+                        <span class="badge bg-secondary">{{ course.get_user_level_display }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Total de Módulos</h6>
+                        <span class="fw-bold">{{ course.total_modules }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Tamaño Estimado</h6>
+                        <span class="text-success">{{ course.total_size_estimate|default:"~300KB contenido interactivo" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prerequisites -->
+        {% if course.prerequisites %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-check me-2"></i>
+                    Prerrequisitos
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for prerequisite in course.prerequisites %}
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        {{ prerequisite }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Course Modules -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book-open me-2"></i>
+                    Estructura del Curso
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for module_title in course.module_list %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center p-3 border rounded">
+                            <div class="me-3">
+                                <span class="badge bg-primary rounded-pill">{{ forloop.counter }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Módulo {{ forloop.counter }}</h6>
+                                <p class="mb-0 text-muted">{{ module_title }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Covered -->
+        {% if course.topics %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>
+                    Temas que Aprenderás
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for topic in course.topics %}
+                    <div class="col-md-6 col-lg-4 mb-2">
+                        <span class="badge bg-light text-dark border">{{ topic }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Podcast Section -->
+        {% if course.podcast_audio_url %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-podcast me-2"></i>
+                    Podcast Introductorio
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Escucha la introducción al curso con María y Carlos</p>
+                <audio controls class="w-100 mb-3">
+                    <source src="{{ course.podcast_audio_url }}" type="audio/mpeg">
+                    Tu navegador no soporta el elemento de audio.
+                </audio>
+                
+                {% if course.podcast_script %}
+                <div class="mt-3">
+                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#podcastScript">
+                        <i class="fas fa-file-text me-1"></i>
+                        Ver Script del Podcast
+                    </button>
+                    <div class="collapse mt-3" id="podcastScript">
+                        <div class="card">
+                            <div class="card-body">
+                                <pre class="mb-0" style="white-space: pre-wrap;">{{ course.podcast_script }}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Introduction -->
+        {% if course.introduction %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-play me-2"></i>
+                    Introducción
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chunk-content">
+                    {{ course.introduction|linebreaks }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-body text-center">
+                {% if course.status == 'metadata_ready' %}
+                    <h6 class="text-muted mb-3">¿Te gusta el curso? ¡Comencemos a generar el contenido!</h6>
+                    <a href="{% url 'course_view' course_id=course.id %}" 
+                       class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-rocket me-2"></i>
+                        Ver Curso Completo
+                    </a>
+                {% elif course.status == 'ready' %}
+                    <h6 class="text-success mb-3">¡El primer módulo está listo!</h6>
+                    <a href="{% url 'course_view' course_id=course.id %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-play me-2"></i>
+                        Ir al Curso
+                    </a>
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center">
+                        <div class="spinner-border text-primary me-3" role="status">
+                            <span class="visually-hidden">Generando...</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ course.get_status_display }}</h6>
+                            <small class="text-muted">Por favor espera mientras generamos tu curso...</small>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="mt-3">
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Crear Otro Curso
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading indicator -->
+<div id="loading-indicator" class="htmx-indicator loading-overlay">
+    <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <h5>Generando contenido del curso...</h5>
+        <p class="text-muted">Esto puede tomar unos segundos</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-badge {
+        font-size: 0.75rem;
+    }
+    
+    .chunk-content {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    audio {
+        height: 40px;
+    }
+    
+    pre {
+        font-size: 0.9rem;
+        color: #666;
+    }
+</style>
+{% endblock %} 

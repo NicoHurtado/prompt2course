@@ -360,6 +360,8 @@ htmlcov/
 *.tmp
 *.temp
 temp*
+# Exception: Don't ignore templates folder
+!templates/
 
 # =============================================================================
 # ARCHIVOS ESPECÍFICOS A IGNORAR (BASADO EN TU PROYECTO)
