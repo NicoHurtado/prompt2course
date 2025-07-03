@@ -11,6 +11,7 @@ class Course(models.Model):
     
     class StatusChoices(models.TextChoices):
         GENERATING_METADATA = 'generating_metadata', 'Generando Metadata'
+        GENERATING_MODULES_METADATA = 'generating_modules_metadata', 'Generando Metadata de Módulos'
         METADATA_READY = 'metadata_ready', 'Metadata Lista'
         GENERATING_MODULE_1 = 'generating_module_1', 'Generando Módulo 1'
         READY = 'ready', 'Listo para Consumir'

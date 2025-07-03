@@ -91,40 +91,33 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="video-container mb-3">
-                    {% if module.video_data %}
+                {% if module.video_data and module.video_data.embed_url %}
+                    <div class="video-container mb-3">
                         <iframe src="{{ module.video_data.embed_url }}" 
                                 title="{{ module.video_data.title }}"
                                 allowfullscreen>
                         </iframe>
-                    {% else %}
-                        <!-- Video simulado -->
-                        <iframe src="https://www.youtube.com/embed/demoM{{ module.module_order }}" 
-                                title="Tutorial Completo: {{ module.title }}"
-                                allowfullscreen>
-                        </iframe>
-                    {% endif %}
-                </div>
-                <div class="video-info">
-                    {% if module.video_data %}
-                        <h6 class="mb-1">{{ module.video_data.title }}</h6>
-                        <small class="text-muted">
-                            <i class="fas fa-clock me-1"></i>{{ module.video_data.duration }} • 
-                            <i class="fas fa-eye me-1"></i>{{ module.video_data.view_count|floatformat:0 }} visualizaciones
-                        </small>
-                        {% if module.video_data.description %}
-                        <p class="mt-2 text-muted">{{ module.video_data.description }}</p>
+                    </div>
+                    <div class="video-info">
+                        <h6>{{ module.video_data.title }}</h6>
+                        {% if module.video_data.duration %}
+                            <span class="badge bg-secondary me-2">{{ module.video_data.duration }}</span>
                         {% endif %}
-                    {% else %}
-                        <!-- Información simulada -->
-                        <h6 class="mb-1">Tutorial Completo: {{ module.title }}</h6>
-                        <small class="text-muted">
-                            <i class="fas fa-clock me-1"></i>15:45 • 
-                            <i class="fas fa-eye me-1"></i>25,300 visualizaciones
-                        </small>
-                        <p class="mt-2 text-muted">Video tutorial completo sobre {{ module.title|lower }}</p>
-                    {% endif %}
-                </div>
+                        {% if module.video_data.view_count %}
+                            <span class="text-muted">{{ module.video_data.view_count|floatformat:0 }} visualizaciones</span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <!-- No video available -->
+                    <div class="text-center py-4">
+                        <i class="fas fa-video-slash fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">Video no disponible</h6>
+                        <p class="text-muted mb-0">
+                            Este módulo no tiene un video tutorial asociado en este momento.
+                            Puedes continuar con el contenido escrito del módulo.
+                        </p>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -151,41 +144,71 @@
 
         <!-- Module Chunks -->
         <div class="chunks-container">
-            {% for chunk in module.chunks.all %}
-            <div class="card mb-4" id="chunk-{{ chunk.chunk_order }}">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-file-text me-2"></i>
-                            {% if chunk.title %}
-                                {{ chunk.title }}
-                            {% else %}
-                                Parte {{ chunk.chunk_order }} de {{ chunk.total_chunks }}
-                            {% endif %}
-                        </h5>
-                        <div>
-                            {% if user_progress and chunk.chunk_id in user_progress.completed_chunks %}
-                                <span class="badge bg-success">
-                                    <i class="fas fa-check me-1"></i>Completado
-                                </span>
-                            {% else %}
-                                <button class="btn btn-outline-success btn-sm mark-complete-btn"
-                                        data-chunk-id="{{ chunk.chunk_id }}"
-                                        onclick="markChunkComplete(this)">
-                                    <i class="fas fa-check me-1"></i>Marcar como Completado
-                                </button>
-                            {% endif %}
+            {% if module.chunks.all %}
+                {% for chunk in module.chunks.all %}
+                <div class="card mb-4" id="chunk-{{ chunk.chunk_order }}">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-text me-2"></i>
+                                {% if chunk.title %}
+                                    {{ chunk.title }}
+                                {% else %}
+                                    Parte {{ chunk.chunk_order }} de {{ chunk.total_chunks }}
+                                {% endif %}
+                            </h5>
+                            <div>
+                                {% if user_progress and chunk.chunk_id in user_progress.completed_chunks %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Completado
+                                    </span>
+                                {% else %}
+                                    <button class="btn btn-outline-success btn-sm mark-complete-btn"
+                                            data-chunk-id="{{ chunk.chunk_id }}"
+                                            onclick="markChunkComplete(this)">
+                                        <i class="fas fa-check me-1"></i>Marcar como Completado
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Chunk Content -->
+                        <div class="chunk-content markdown-body mb-4">
+                            {{ chunk.content|markdownify }}
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <!-- Chunk Content -->
-                    <div class="chunk-content markdown-body mb-4">
-                        {{ chunk.content|markdownify }}
+                {% endfor %}
+            {% else %}
+                <!-- No content yet - show generation message -->
+                <div class="card mb-4">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Generando...</span>
+                            </div>
+                        </div>
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-magic me-2"></i>
+                            Generando Contenido del Módulo
+                        </h5>
+                        <p class="text-muted mb-4">
+                            Estamos creando el contenido personalizado para este módulo.<br>
+                            Este proceso toma aproximadamente <strong>2-3 minutos</strong>.
+                        </p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>¿Qué está pasando?</strong><br>
+                            Nuestro sistema de IA está generando contenido educativo específico, 
+                            ejercicios prácticos y evaluaciones para este módulo.
+                        </div>
+                        <button class="btn btn-outline-primary" onclick="location.reload()">
+                            <i class="fas fa-refresh me-2"></i>Actualizar Página
+                        </button>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
 
         <!-- Module Quizzes -->

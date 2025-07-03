@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Crear directorio logs si no existe
+mkdir -p logs
+
 # Activar entorno virtual si existe (por si se usa localmente)
 if [ -f ".venv/bin/activate" ]; then
     source .venv/bin/activate

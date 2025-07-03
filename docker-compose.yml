@@ -18,7 +18,7 @@ services:
   celery:
     build: .
     container_name: p2c_celery
-    command: ["/entrypoint.sh", "celery"]
+    entrypoint: ["/app/celery-entrypoint.sh"]
     volumes:
       - .:/app
     env_file:

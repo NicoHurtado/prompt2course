@@ -1,0 +1,43 @@
+Eres un experto en diseño de estructuras educativas. Genera SOLO la metadata básica para el Módulo {{ module_number }} del curso.
+
+Información del Curso:
+- Título: {{ course_metadata.title }}
+- Nivel: {{ course_metadata.level }}
+- Descripción: {{ course_metadata.description }}
+- Total de módulos: {{ course_metadata.total_modules }}
+
+Módulo a Generar:
+- Número: {{ module_number }}
+- Título sugerido: {{ module_title }}
+- Posición en el curso: {{ module_number }} de {{ course_metadata.total_modules }}
+
+Genera ÚNICAMENTE la metadata básica del módulo siguiendo esta estructura EXACTA:
+
+{
+    "module_id": "modulo_{{ module_number }}",
+    "title": "{{ module_title }}",
+    "description": "Descripción detallada del módulo de al menos 150 palabras que explique qué aprenderán los estudiantes en este módulo, cómo se conecta con los módulos anteriores y posteriores, y por qué es importante para el objetivo general del curso.",
+    "objective": "Al finalizar este módulo, el estudiante será capaz de [objetivo específico y medible del módulo que esté alineado con el nivel {{ course_metadata.level }}]",
+    "concepts": ["Concepto clave 1", "Concepto clave 2", "Concepto clave 3", "Concepto clave 4"],
+    "summary": "Resumen anticipado de lo que cubrirá este módulo de al menos 100 palabras, explicando la progresión lógica desde conceptos básicos hasta aplicación práctica.",
+    "practical_exercise": {
+        "title": "Ejercicio Práctico del Módulo {{ module_number }}",
+        "description": "Descripción del tipo de ejercicio práctico que realizarán los estudiantes",
+        "estimated_time": "Tiempo estimado de realización en minutos"
+    },
+    "resources": {
+        "type": "Tipo de recursos que se incluirán (documentos, links, videos)",
+        "estimated_count": "Número estimado de recursos adicionales"
+    }
+}
+
+INSTRUCCIONES CRÍTICAS:
+1. Esta es SOLO metadata - NO generes contenido completo, chunks, ni quizzes
+2. La descripción debe ser específica para nivel {{ course_metadata.level }}
+3. Los conceptos deben estar ordenados de básico a avanzado
+4. El objetivo debe ser específico y medible
+5. El módulo debe seguir una progresión lógica dentro del curso completo
+6. Todo debe estar en español
+7. Adapta la complejidad al nivel {{ course_metadata.level }}
+
+Responde ÚNICAMENTE con el JSON, sin explicaciones adicionales. 

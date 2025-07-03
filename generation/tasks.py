@@ -103,7 +103,7 @@ def generate_course_metadata(self, course_id: str):
             
             logger.info(f"Metadata generada exitosamente para curso {course_id} en {duration:.2f}s")
             
-            # Activar inmediatamente la generación del módulo 1
+            # Activar inmediatamente la generación del módulo 1 (flujo original)
             generate_module_1.delay(str(course_id))
             
         finally:
@@ -127,9 +127,122 @@ def generate_course_metadata(self, course_id: str):
 
 
 @shared_task(bind=True)
+def generate_modules_metadata(self, course_id: str):
+    """
+    Fase 1.5: Generar metadata de todos los módulos (sin contenido completo)
+    
+    Esta fase genera la metadata básica de todos los módulos para que el usuario
+    pueda ver la estructura completa del curso antes de que se genere el contenido.
+    """
+    start_time = time.time()
+    course = None
+    
+    try:
+        logger.info(f"Iniciando generación de metadata de módulos para curso {course_id}")
+        
+        course = Course.objects.get(id=course_id)
+        course.status = Course.StatusChoices.GENERATING_MODULES_METADATA
+        course.save()
+        
+        GenerationLog.objects.create(
+            course=course,
+            action=GenerationLog.ActionChoices.MODULE_GENERATION,
+            message="Iniciando generación de metadata de módulos"
+        )
+        
+        # Preparar metadata del curso
+        course_metadata = {
+            'title': course.title,
+            'description': course.description,
+            'level': course.user_level,
+            'module_list': course.module_list,
+            'topics': course.topics,
+            'total_modules': course.total_modules
+        }
+        
+        # Ejecutar generación asíncrona
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            modules_created = 0
+            
+            # Generar metadata para todos los módulos
+            for module_number in range(1, course.total_modules + 1):
+                # No crear si ya existe
+                if Module.objects.filter(course=course, module_order=module_number).exists():
+                    continue
+                
+                try:
+                    logger.info(f"Generando metadata del módulo {module_number}")
+                    
+                    # Generar solo metadata del módulo (sin chunks)
+                    module_metadata = loop.run_until_complete(
+                        anthropic_service.create_module_metadata(course_metadata, module_number)
+                    )
+                    
+                    # Crear módulo en la base de datos con solo metadata
+                    Module.objects.create(
+                        course=course,
+                        module_id=module_metadata.get('module_id', f'modulo_{module_number}'),
+                        module_order=module_number,
+                        title=module_metadata.get('title', ''),
+                        description=module_metadata.get('description', ''),
+                        objective=module_metadata.get('objective', ''),
+                        concepts=module_metadata.get('concepts', []),
+                        summary=module_metadata.get('summary', ''),
+                        practical_exercise=module_metadata.get('practical_exercise', {}),
+                        resources=module_metadata.get('resources', {})
+                    )
+                    
+                    modules_created += 1
+                    logger.info(f"Metadata del módulo {module_number} generada exitosamente")
+                    
+                except Exception as module_error:
+                    logger.error(f"Error generando metadata del módulo {module_number}: {module_error}")
+                    # Continuar con siguiente módulo
+            
+            course.status = Course.StatusChoices.METADATA_READY
+            course.save()
+            
+            duration = time.time() - start_time
+            GenerationLog.objects.create(
+                course=course,
+                action=GenerationLog.ActionChoices.MODULE_GENERATION,
+                message=f"Metadata de {modules_created} módulos generada exitosamente",
+                duration_seconds=duration,
+                details={'modules_created': modules_created, 'total_modules': course.total_modules}
+            )
+            
+            logger.info(f"Metadata de módulos generada exitosamente para curso {course_id} en {duration:.2f}s")
+            
+            # Activar inmediatamente la generación del contenido del módulo 1
+            generate_module_1.delay(str(course_id))
+            
+        finally:
+            loop.close()
+            
+    except Exception as e:
+        logger.error(f"Error en generación de metadata de módulos para curso {course_id}: {e}")
+        
+        if course:
+            course.status = Course.StatusChoices.FAILED
+            course.save()
+            
+            GenerationLog.objects.create(
+                course=course,
+                action=GenerationLog.ActionChoices.ERROR,
+                message=f"Error en generación de metadata de módulos: {str(e)}",
+                duration_seconds=time.time() - start_time
+            )
+        
+        raise
+
+
+@shared_task(bind=True)
 def generate_module_1(self, course_id: str):
     """
-    Fase 2: Generar únicamente el módulo 1 para acceso inmediato
+    Fase 2: Generar únicamente el contenido completo del módulo 1
     
     Esta fase genera el primer módulo completo con contenido y videos
     para que el usuario pueda empezar a consumir el curso.
@@ -138,7 +251,7 @@ def generate_module_1(self, course_id: str):
     course = None
     
     try:
-        logger.info(f"Iniciando generación de módulo 1 para curso {course_id}")
+        logger.info(f"Iniciando generación de contenido del módulo 1 para curso {course_id}")
         
         course = Course.objects.get(id=course_id)
         course.status = Course.StatusChoices.GENERATING_MODULE_1
@@ -147,7 +260,7 @@ def generate_module_1(self, course_id: str):
         GenerationLog.objects.create(
             course=course,
             action=GenerationLog.ActionChoices.MODULE_GENERATION,
-            message="Iniciando generación de módulo 1"
+            message="Iniciando generación de contenido del módulo 1"
         )
         
         # Preparar metadata del curso
@@ -159,12 +272,27 @@ def generate_module_1(self, course_id: str):
             'topics': course.topics
         }
         
+        # Crear metadata básica para todos los módulos si no existen
+        for module_number in range(1, course.total_modules + 1):
+            if not Module.objects.filter(course=course, module_order=module_number).exists():
+                Module.objects.create(
+                    course=course,
+                    module_id=f'modulo_{module_number}',
+                    module_order=module_number,
+                    title=course.module_list[module_number - 1] if len(course.module_list) >= module_number else f'Módulo {module_number}',
+                    description=f'Descripción del módulo {module_number}',
+                    objective=f'Objetivo del módulo {module_number}'
+                )
+        
+        # Obtener el módulo 1 (ahora garantizamos que existe)
+        module = Module.objects.get(course=course, module_order=1)
+        
         # Ejecutar generación asíncrona
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         
         try:
-            # Generar contenido del módulo 1
+            # Generar contenido completo del módulo 1
             module_data = loop.run_until_complete(
                 anthropic_service.create_module_content(course_metadata, 1)
             )
@@ -173,19 +301,15 @@ def generate_module_1(self, course_id: str):
             if not anthropic_service.validate_module_structure(module_data):
                 raise ValueError("Estructura de módulo inválida")
             
-            # Crear módulo en la base de datos
-            module = Module.objects.create(
-                course=course,
-                module_id=module_data.get('module_id', 'modulo_1'),
-                module_order=1,
-                title=module_data.get('title', ''),
-                description=module_data.get('description', ''),
-                objective=module_data.get('objective', ''),
-                concepts=module_data.get('concepts', []),
-                summary=module_data.get('summary', ''),
-                practical_exercise=module_data.get('practical_exercise', {}),
-                resources=module_data.get('resources', {})
-            )
+            # Actualizar módulo con contenido completo
+            module.title = module_data.get('title', module.title)
+            module.description = module_data.get('description', module.description)
+            module.objective = module_data.get('objective', module.objective)
+            module.concepts = module_data.get('concepts', [])
+            module.summary = module_data.get('summary', '')
+            module.practical_exercise = module_data.get('practical_exercise', {})
+            module.resources = module_data.get('resources', {})
+            module.save()
             
             # Crear chunks del módulo
             chunks_data = module_data.get('chunks', [])
@@ -240,18 +364,18 @@ def generate_module_1(self, course_id: str):
             GenerationLog.objects.create(
                 course=course,
                 action=GenerationLog.ActionChoices.MODULE_GENERATION,
-                message="Módulo 1 generado exitosamente",
+                message="Contenido del módulo 1 generado exitosamente",
                 duration_seconds=duration,
                 details={'module_id': module.module_id, 'chunks_count': len(chunks_data)}
             )
             
-            logger.info(f"Módulo 1 generado exitosamente para curso {course_id} en {duration:.2f}s")
+            logger.info(f"Contenido del módulo 1 generado exitosamente para curso {course_id} en {duration:.2f}s")
             
         finally:
             loop.close()
             
     except Exception as e:
-        logger.error(f"Error en generación de módulo 1 para curso {course_id}: {e}")
+        logger.error(f"Error en generación de contenido del módulo 1 para curso {course_id}: {e}")
         
         if course:
             course.status = Course.StatusChoices.FAILED
@@ -260,7 +384,7 @@ def generate_module_1(self, course_id: str):
             GenerationLog.objects.create(
                 course=course,
                 action=GenerationLog.ActionChoices.ERROR,
-                message=f"Error en generación de módulo 1: {str(e)}",
+                message=f"Error en generación de contenido del módulo 1: {str(e)}",
                 duration_seconds=time.time() - start_time
             )
         
@@ -310,8 +434,11 @@ def generate_remaining_modules(self, course_id: str):
         try:
             # Generar módulos 2, 3, 4...
             for module_number in range(2, total_modules + 1):
-                if Module.objects.filter(course=course, module_order=module_number).exists():
-                    continue  # Skip si ya existe
+                # Verificar si el módulo ya tiene contenido
+                existing_module = Module.objects.filter(course=course, module_order=module_number).first()
+                if existing_module and existing_module.chunks.count() > 0:
+                    logger.info(f"Módulo {module_number} ya tiene contenido, saltando")
+                    continue  # Skip solo si ya tiene chunks
                 
                 try:
                     logger.info(f"Generando módulo {module_number}")
@@ -320,19 +447,34 @@ def generate_remaining_modules(self, course_id: str):
                         anthropic_service.create_module_content(course_metadata, module_number)
                     )
                     
-                    # Crear módulo y su contenido (similar a generate_module_1)
-                    module = Module.objects.create(
-                        course=course,
-                        module_id=module_data.get('module_id', f'modulo_{module_number}'),
-                        module_order=module_number,
-                        title=module_data.get('title', ''),
-                        description=module_data.get('description', ''),
-                        objective=module_data.get('objective', ''),
-                        concepts=module_data.get('concepts', []),
-                        summary=module_data.get('summary', ''),
-                        practical_exercise=module_data.get('practical_exercise', {}),
-                        resources=module_data.get('resources', {})
-                    )
+                    logger.info(f"Módulo {module_number} generado exitosamente")
+                    
+                    # Usar módulo existente o crear nuevo
+                    if existing_module:
+                        module = existing_module
+                        # Actualizar módulo existente
+                        module.title = module_data.get('title', module.title)
+                        module.description = module_data.get('description', module.description)
+                        module.objective = module_data.get('objective', module.objective)
+                        module.concepts = module_data.get('concepts', [])
+                        module.summary = module_data.get('summary', '')
+                        module.practical_exercise = module_data.get('practical_exercise', {})
+                        module.resources = module_data.get('resources', {})
+                        module.save()
+                    else:
+                        # Crear módulo nuevo
+                        module = Module.objects.create(
+                            course=course,
+                            module_id=module_data.get('module_id', f'modulo_{module_number}'),
+                            module_order=module_number,
+                            title=module_data.get('title', ''),
+                            description=module_data.get('description', ''),
+                            objective=module_data.get('objective', ''),
+                            concepts=module_data.get('concepts', []),
+                            summary=module_data.get('summary', ''),
+                            practical_exercise=module_data.get('practical_exercise', {}),
+                            resources=module_data.get('resources', {})
+                        )
                     
                     # Crear chunks y videos
                     chunks_data = module_data.get('chunks', [])

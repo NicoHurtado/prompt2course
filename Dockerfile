@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Instalar dependencias del sistema
 RUN apt-get update && \
-    apt-get install -y build-essential libpq-dev gcc sqlite3 && \
+    apt-get install -y build-essential libpq-dev gcc sqlite3 redis-tools && \
     apt-get clean
 
 # Crear directorio de trabajo
@@ -23,8 +23,9 @@ COPY . .
 # Crear carpetas necesarias
 RUN mkdir -p logs static
 
-# Copiar el entrypoint
+# Copiar los entrypoints
 COPY docker-entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY celery-entrypoint.sh /app/celery-entrypoint.sh
+RUN chmod +x /entrypoint.sh /app/celery-entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"] 

@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 from typing import List, Dict, Any, Optional
@@ -11,8 +12,23 @@ class YouTubeService:
     """Servicio para buscar videos educativos en YouTube usando la API v3"""
     
     def __init__(self):
-        self.api_key = settings.YOUTUBE_DATA_API_KEY
+        """Initialize the YouTube service using the API key defined in
+        project settings or environment variables. Falls back to a lower-case
+        env var for backwards compatibility. The previous hard-coded key has
+        been removed to avoid exposing sensitive credentials in source code.
+        """
+
+        # 1. Try to get the key from Django settings (preferred)
+        self.api_key: str = getattr(settings, "YOUTUBE_DATA_API_KEY", "")
+
+        # 2. Fallback – try lower-case env var to be tolerant with naming
+        if not self.api_key:
+            self.api_key = os.getenv("youtube_data_api_key", "")
+
         self._youtube = None
+
+        # Determine availability: simple length check; don't leak key format
+        self._api_available = bool(self.api_key and len(self.api_key.strip()) > 20)
     
     @property
     def youtube(self):
@@ -23,10 +39,43 @@ class YouTubeService:
             self._youtube = build('youtube', 'v3', developerKey=self.api_key)
         return self._youtube
     
+    def _test_api_key(self) -> bool:
+        """Test if the YouTube API key actually works"""
+        try:
+            if not self._api_available:
+                return False
+            
+            # Simple test call to verify API key works
+            test_response = self.youtube.search().list(
+                q="test",
+                part='id',
+                maxResults=1,
+                type='video'
+            ).execute()
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"YouTube API key test failed: {e}")
+            self._api_available = False
+            return False
+    
     async def search_educational_videos(self, query: str, max_results: int = 3) -> List[Dict[str, Any]]:
         """
         Buscar videos educativos en YouTube basados en una consulta
         """
+        # Verificar si API está disponible y funciona
+        if not self._api_available:
+            logger.info("YouTube API not configured or not available. Skipping video search.")
+            return []
+        
+        # Test API key on first use
+        if not hasattr(self, '_api_tested'):
+            self._api_tested = True
+            if not self._test_api_key():
+                logger.info("YouTube API key test failed. Disabling video search for this session.")
+                return []
+            
         try:
             logger.info(f"Buscando videos para: {query}")
             
@@ -55,6 +104,10 @@ class YouTubeService:
         """
         Obtener detalles específicos de un video por su ID
         """
+        if not self._api_available:
+            logger.warning("YouTube API key not configured. Cannot get video details.")
+            return None
+            
         try:
             logger.info(f"Obteniendo detalles del video: {video_id}")
             
@@ -76,6 +129,11 @@ class YouTubeService:
         """
         Buscar videos específicos para un chunk de contenido
         """
+        # Verificar si API está disponible
+        if not self._api_available:
+            logger.info("YouTube API not available. Skipping video search for chunk.")
+            return []
+            
         try:
             # Usar la consulta específica del chunk si existe
             search_query = chunk_data.get('video_search_query')

@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 import json
 from .models import Course, Module, UserProgress
 from django.urls import reverse
+from generation.tasks import generate_course_metadata, generate_remaining_modules
 
 
 def index(request):
@@ -16,26 +17,55 @@ def index(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def simple_course_create(request):
-    """Vista simple para demostrar la creación de cursos sin APIs externas"""
+    """Vista para crear cursos reales usando la API de Claude"""
     try:
-        # Obtener el último curso creado como demostración
-        sample_course = Course.objects.filter(status=Course.StatusChoices.COMPLETE).last()
+        # Obtener datos del formulario
+        user_prompt = request.POST.get('user_prompt', '').strip()
+        user_level = request.POST.get('user_level', 'principiante')
+        user_interests_json = request.POST.get('user_interests', '[]')
         
-        if sample_course:
+        # Validar datos requeridos
+        if not user_prompt:
             return JsonResponse({
-                'id': str(sample_course.id),
-                'title': sample_course.title,
-                'status': 'complete',
-                'message': 'Redirigiendo al curso de demostración'
-            }, status=201)
-        else:
-            return JsonResponse({
-                'error': 'No hay cursos de demostración disponibles. Ejecuta create_sample_data.py'
+                'error': 'El prompt es requerido'
             }, status=400)
+            
+        if len(user_prompt) < 10:
+            return JsonResponse({
+                'error': 'El prompt debe tener al menos 10 caracteres'
+            }, status=400)
+        
+        # Parsear intereses
+        try:
+            user_interests = json.loads(user_interests_json)
+            if not isinstance(user_interests, list):
+                user_interests = []
+        except (json.JSONDecodeError, TypeError):
+            user_interests = []
+        
+        # Crear curso con status inicial
+        course = Course.objects.create(
+            user_prompt=user_prompt,
+            user_level=user_level,
+            user_interests=user_interests,
+            status=Course.StatusChoices.GENERATING_METADATA,
+            language='es'  # Por defecto español
+        )
+        
+        # Iniciar tarea asíncrona de generación de metadata (Fase 1)
+        generate_course_metadata.delay(str(course.id))
+        
+        # Respuesta inmediata con datos básicos
+        return JsonResponse({
+            'id': str(course.id),
+            'status': course.status,
+            'title': course.title or None,
+            'message': 'Curso creado exitosamente. Generando metadata con IA...'
+        }, status=201)
             
     except Exception as e:
         return JsonResponse({
-            'error': f'Error: {str(e)}'
+            'error': f'Error interno del servidor: {str(e)}'
         }, status=500)
 
 
@@ -82,6 +112,18 @@ def module_view(request, course_id, module_id):
     """Vista de módulo individual"""
     course = get_object_or_404(Course, id=course_id)
     module = get_object_or_404(Module, course=course, module_id=module_id)
+    
+    # AUTO-GENERACIÓN: Si el módulo no tiene contenido, activar generación
+    if module.chunks.count() == 0 and module.module_order > 1:
+        # Solo para módulos 2+ que estén vacíos
+        # Verificar que no esté ya en proceso de generación
+        if course.status in [Course.StatusChoices.READY, Course.StatusChoices.COMPLETE]:
+            # Activar generación de módulos restantes
+            generate_remaining_modules.delay(str(course.id))
+            
+            # Cambiar status a indicar que se están generando módulos restantes
+            course.status = Course.StatusChoices.GENERATING_REMAINING
+            course.save()
     
     # Obtener módulos anterior y siguiente
     previous_module = Module.objects.filter(

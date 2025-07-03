@@ -734,19 +734,8 @@ Usa el ternario para asignaciones simples; para lógicas complejas, usa la forma
         
         print(f"  📚 Módulo creado: {module.title}")
         
-        # Añadir datos de video si el campo existe
-        if hasattr(module, 'video_data'):
-            module.video_data = {
-                "video_id": f"demo_video_modulo_{i}",
-                "title": f"Tutorial Completo: {module_data['title']}",
-                "url": f"https://www.youtube.com/watch?v=demoM{i}",
-                "embed_url": f"https://www.youtube.com/embed/demoM{i}",
-                "thumbnail_url": "https://img.youtube.com/vi/default/maxresdefault.jpg",
-                "duration": "15:45",
-                "view_count": 25300,
-                "description": f"Video tutorial completo sobre {module_data['title'].lower()}"
-            }
-            module.save()
+        # Nota: Los videos se buscan dinámicamente con la API de YouTube
+        # No se crean datos falsos de videos
         
         # Crear chunks para este módulo
         for j, chunk_data in enumerate(module_data["chunks"], 1):
@@ -758,7 +747,7 @@ Usa el ternario para asignaciones simples; para lógicas complejas, usa la forma
                 title=chunk_data["title"],
                 content=chunk_data["content"]
             )
-            
+        
         # Los videos ahora están a nivel de módulo, no de chunk
         
         # Crear quiz para el módulo

@@ -88,20 +88,91 @@ class AnthropicService:
             response = await asyncio.to_thread(
                 self._call_claude_sync,
                 system_prompt,
-                f"Genera el contenido completo del módulo {module_number} siguiendo la estructura P2C.",
-                max_tokens=6000
+                f"Generar contenido completo del módulo {module_number}: {course_metadata['module_list'][module_number - 1]}",
+                max_tokens=8000
             )
             
-            module_content = json.loads(response)
+            # Robusto manejo de JSON con limpieza de caracteres problemáticos
+            try:
+                # Limpiar caracteres de control que pueden causar errores de JSON
+                import re
+                cleaned_response = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', response)
+                cleaned_response = cleaned_response.replace('\\n', ' ').replace('\\t', ' ')
+                
+                module_data = json.loads(cleaned_response)
+                
+            except json.JSONDecodeError as json_error:
+                logger.error(f"Error JSON en módulo {module_number}: {json_error}")
+                logger.error(f"Respuesta problemática: {response[:500]}...")
+                
+                # Intentar extraer JSON válido de la respuesta
+                try:
+                    # Buscar el JSON dentro de la respuesta
+                    json_start = response.find('{')
+                    json_end = response.rfind('}') + 1
+                    
+                    if json_start != -1 and json_end > json_start:
+                        json_part = response[json_start:json_end]
+                        # Limpiar caracteres problemáticos del JSON extraído
+                        json_part = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_part)
+                        module_data = json.loads(json_part)
+                        logger.info(f"JSON recuperado exitosamente para módulo {module_number}")
+                    else:
+                        raise ValueError(f"No se encontró JSON válido en la respuesta para módulo {module_number}")
+                        
+                except (json.JSONDecodeError, ValueError) as recovery_error:
+                    logger.error(f"No se pudo recuperar JSON para módulo {module_number}: {recovery_error}")
+                    # Crear estructura mínima válida
+                    module_data = {
+                        "module_id": f"modulo_{module_number}",
+                        "title": course_metadata['module_list'][module_number - 1],
+                        "description": f"Contenido del módulo {module_number}",
+                        "chunks": [],
+                        "concepts": [],
+                        "quiz": []
+                    }
             
             logger.info(f"Módulo {module_number} generado exitosamente")
-            return module_content
+            return module_data
             
         except json.JSONDecodeError as e:
             logger.error(f"Error parsing module content JSON: {e}")
             raise ValueError(f"Respuesta de Claude no válida para módulo: {e}")
         except Exception as e:
             logger.error(f"Error en generación de módulo {module_number}: {e}")
+            raise
+    
+    async def create_module_metadata(self, course_metadata: Dict[str, Any], module_number: int) -> Dict[str, Any]:
+        """
+        Fase 1.5: Generar solo metadata de un módulo específico (sin contenido completo)
+        """
+        try:
+            logger.info(f"Iniciando generación de metadata del módulo {module_number}")
+            
+            template = self.template_env.get_template('module_metadata_prompt.j2')
+            system_prompt = template.render(
+                course_metadata=course_metadata,
+                module_number=module_number,
+                module_title=course_metadata['module_list'][module_number - 1]
+            )
+            
+            response = await asyncio.to_thread(
+                self._call_claude_sync,
+                system_prompt,
+                f"Genera solo la metadata del módulo {module_number} siguiendo la estructura P2C.",
+                max_tokens=2000
+            )
+            
+            module_metadata = json.loads(response)
+            
+            logger.info(f"Metadata del módulo {module_number} generada exitosamente")
+            return module_metadata
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Error parsing module metadata JSON: {e}")
+            raise ValueError(f"Respuesta de Claude no válida para metadata del módulo: {e}")
+        except Exception as e:
+            logger.error(f"Error en generación de metadata del módulo {module_number}: {e}")
             raise
     
     async def create_final_project(self, course_metadata: Dict[str, Any], modules_data: List[Dict[str, Any]]) -> Dict[str, Any]:
