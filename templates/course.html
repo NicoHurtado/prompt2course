@@ -380,6 +380,30 @@
                         <i class="fas fa-play me-2"></i>
                         Estudiar Mientras Generamos
                     </a>
+                {% elif course.status == 'metadata_ready' %}
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            ¡Estructura del Curso Lista!
+                        </h5>
+                        <p class="mb-0">
+                            Ya puedes explorar la estructura completa del curso. 
+                            El contenido del primer módulo se está generando ahora.
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center mb-3">
+                        <div class="spinner-border text-primary me-3" role="status">
+                            <span class="visually-hidden">Generando...</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Generando Primer Módulo</h5>
+                            <small class="text-muted">Podrás empezar a estudiar en unos minutos</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary btn-lg" disabled>
+                        <i class="fas fa-clock me-2"></i>
+                        Esperando Contenido...
+                    </button>
                 {% else %}
                     <div class="d-flex align-items-center justify-content-center">
                         <div class="spinner-border text-primary me-3" role="status">
@@ -410,6 +434,60 @@
 let audioPlaying = false;
 let audioProgress = 0;
 let audioInterval;
+
+// Polling automático para estados en progreso
+document.addEventListener('DOMContentLoaded', function() {
+    const courseStatus = '{{ course.status }}';
+    const courseId = '{{ course.id }}';
+    
+    // Solo hacer polling si el curso está en estado de generación
+    if (courseStatus === 'metadata_ready' || courseStatus === 'generating_module_1' || courseStatus === 'generating_remaining') {
+        startCoursePolling(courseId);
+    }
+});
+
+function startCoursePolling(courseId) {
+    const pollInterval = setInterval(function() {
+        fetch(`/course/${courseId}/status/`)
+            .then(response => response.json())
+            .then(data => {
+                // Si el estado cambió a listo o completo, recargar la página
+                if (data.status === 'ready' || data.status === 'complete') {
+                    clearInterval(pollInterval);
+                    location.reload();
+                }
+                
+                // Si falló, mostrar error
+                if (data.status === 'failed') {
+                    clearInterval(pollInterval);
+                    showCourseError();
+                }
+            })
+            .catch(error => {
+                console.error('Error polling course status:', error);
+                clearInterval(pollInterval);
+            });
+    }, 5000); // Poll cada 5 segundos
+}
+
+function showCourseError() {
+    const statusContainer = document.querySelector('.card:last-child .card-body');
+    if (statusContainer) {
+        statusContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error en la Generación
+                </h5>
+                <p>Hubo un problema generando el contenido del curso. Por favor, intenta crear un nuevo curso.</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Nuevo Curso
+                </a>
+            </div>
+        `;
+    }
+}
 
 function playIntroAudio() {
     const container = document.getElementById('intro-audio-container');

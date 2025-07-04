@@ -113,12 +113,13 @@ def module_view(request, course_id, module_id):
     course = get_object_or_404(Course, id=course_id)
     module = get_object_or_404(Module, course=course, module_id=module_id)
     
-    # AUTO-GENERACIÓN: Si el módulo no tiene contenido, activar generación
+    # AUTO-GENERACIÓN: Si el módulo no tiene contenido, activar generación (fallback)
+    # Nota: Con el nuevo flujo automático, esto solo debería ejecutarse como respaldo
     if module.chunks.count() == 0 and module.module_order > 1:
         # Solo para módulos 2+ que estén vacíos
         # Verificar que no esté ya en proceso de generación
-        if course.status in [Course.StatusChoices.READY, Course.StatusChoices.COMPLETE]:
-            # Activar generación de módulos restantes
+        if course.status == Course.StatusChoices.READY:
+            # Activar generación de módulos restantes como fallback
             generate_remaining_modules.delay(str(course.id))
             
             # Cambiar status a indicar que se están generando módulos restantes

@@ -246,6 +246,9 @@ def generate_module_1(self, course_id: str):
     
     Esta fase genera el primer módulo completo con contenido y videos
     para que el usuario pueda empezar a consumir el curso.
+    
+    Al completarse, activa automáticamente la generación de módulos restantes
+    para que el usuario pueda leer el módulo 1 mientras se generan los demás.
     """
     start_time = time.time()
     course = None
@@ -313,6 +316,8 @@ def generate_module_1(self, course_id: str):
             
             # Crear chunks del módulo
             chunks_data = module_data.get('chunks', [])
+            first_video_for_module = None  # Para guardar el primer video en module.video_data
+            
             for chunk_data in chunks_data:
                 chunk = Chunk.objects.create(
                     module=module,
@@ -320,7 +325,8 @@ def generate_module_1(self, course_id: str):
                     chunk_order=chunk_data.get('chunk_order', 1),
                     total_chunks=chunk_data.get('total_chunks', 6),
                     content=chunk_data.get('content', ''),
-                    checksum=chunk_data.get('checksum', '')
+                    checksum=chunk_data.get('checksum', ''),
+                    title=chunk_data.get('title', '')  # Campo disponible
                 )
                 
                 # Buscar y asignar video para este chunk
@@ -342,9 +348,19 @@ def generate_module_1(self, course_id: str):
                             view_count=video_data.get('view_count', 0)
                         )
                         
+                        # Guardar el primer video encontrado para el módulo
+                        if first_video_for_module is None:
+                            first_video_for_module = video_data
+                        
                 except Exception as video_error:
                     logger.warning(f"Error buscando video para chunk {chunk.chunk_id}: {video_error}")
                     # Continuar sin video si falla la búsqueda
+            
+            # Asignar el primer video encontrado al campo video_data del módulo
+            if first_video_for_module:
+                module.video_data = first_video_for_module
+                module.save()
+                logger.info(f"Video principal asignado al módulo: {first_video_for_module.get('title', 'Sin título')}")
             
             # Crear quiz del módulo
             quiz_data = module_data.get('quiz', [])
@@ -370,6 +386,12 @@ def generate_module_1(self, course_id: str):
             )
             
             logger.info(f"Contenido del módulo 1 generado exitosamente para curso {course_id} en {duration:.2f}s")
+            
+            # Activar automáticamente la generación de módulos restantes
+            # El usuario ya puede acceder al módulo 1 mientras se generan los demás
+            if course.total_modules > 1:
+                logger.info(f"Activando generación automática de módulos restantes para curso {course_id}")
+                generate_remaining_modules.delay(str(course_id))
             
         finally:
             loop.close()
@@ -478,6 +500,8 @@ def generate_remaining_modules(self, course_id: str):
                     
                     # Crear chunks y videos
                     chunks_data = module_data.get('chunks', [])
+                    first_video_for_module = None  # Para guardar el primer video en module.video_data
+                    
                     for chunk_data in chunks_data:
                         chunk = Chunk.objects.create(
                             module=module,
@@ -485,7 +509,8 @@ def generate_remaining_modules(self, course_id: str):
                             chunk_order=chunk_data.get('chunk_order', 1),
                             total_chunks=chunk_data.get('total_chunks', 6),
                             content=chunk_data.get('content', ''),
-                            checksum=chunk_data.get('checksum', '')
+                            checksum=chunk_data.get('checksum', ''),
+                            title=chunk_data.get('title', '')  # Campo disponible
                         )
                         
                         # Buscar videos para chunks
@@ -506,8 +531,19 @@ def generate_remaining_modules(self, course_id: str):
                                     duration=video_data.get('duration', 'N/A'),
                                     view_count=video_data.get('view_count', 0)
                                 )
+                                
+                                # Guardar el primer video encontrado para el módulo
+                                if first_video_for_module is None:
+                                    first_video_for_module = video_data
+                                    
                         except Exception as video_error:
                             logger.warning(f"Error buscando video para chunk {chunk.chunk_id}: {video_error}")
+                    
+                    # Asignar el primer video encontrado al campo video_data del módulo
+                    if first_video_for_module:
+                        module.video_data = first_video_for_module
+                        module.save()
+                        logger.info(f"Video principal asignado al módulo {module_number}: {first_video_for_module.get('title', 'Sin título')}")
                     
                     # Crear quiz
                     quiz_data = module_data.get('quiz', [])

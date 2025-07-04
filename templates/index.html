@@ -242,13 +242,20 @@
                 .then(data => {
                     updateProgress(data);
                     
-                    // Detener polling cuando esté listo o completo
-                    if (data.status === 'ready' || data.status === 'complete' || data.status === 'failed') {
+                    // Manejar errores
+                    if (data.status === 'failed') {
                         clearInterval(pollInterval);
-                        if (data.status === 'ready' || data.status === 'complete') {
-                            showCourseReady(courseId, data);
-                        } else {
-                            showError();
+                        showError();
+                        return;
+                    }
+                    
+                    // Permitir acceso desde metadata_ready, ready o complete
+                    if (data.status === 'metadata_ready' || data.status === 'ready' || data.status === 'complete') {
+                        showCourseReady(courseId, data);
+                        
+                        // Solo parar polling cuando esté complete
+                        if (data.status === 'complete') {
+                            clearInterval(pollInterval);
                         }
                     }
                 })
@@ -257,7 +264,7 @@
                     clearInterval(pollInterval);
                     showError();
                 });
-        }, 2000); // Poll cada 2 segundos
+        }, 5000); // Poll cada 5 segundos (reducido para evitar spam)
     }
 
     function updateProgress(data) {
@@ -279,9 +286,9 @@
     function getStatusText(status) {
         const statusMap = {
             'generating_metadata': 'Generando estructura del curso...',
-            'metadata_ready': 'Creando primer módulo...',
+            'metadata_ready': 'Estructura lista - ¡Ya puedes ver el curso!',
             'generating_module_1': 'Preparando contenido inicial...',
-            'ready': 'Curso listo para empezar',
+            'ready': 'Primer módulo listo - ¡Puedes empezar!',
             'generating_remaining': 'Completando módulos restantes...',
             'complete': 'Curso completamente generado',
             'failed': 'Error en la generación'
@@ -290,10 +297,25 @@
     }
 
     function showCourseReady(courseId, data) {
+        let statusMessage = '';
+        let statusClass = 'success';
+        
+        if (data.status === 'metadata_ready') {
+            statusMessage = 'Estructura del curso lista. El contenido se está generando en background.';
+            statusClass = 'info';
+        } else if (data.status === 'ready') {
+            statusMessage = 'Primer módulo listo. Los módulos restantes se están generando mientras navegas.';
+            statusClass = 'success';
+        } else if (data.status === 'complete') {
+            statusMessage = 'Curso completamente generado y listo para consumir.';
+            statusClass = 'success';
+        }
+        
         document.getElementById('result-area').innerHTML = `
-            <div class="alert alert-success">
-                <h5><i class="fas fa-check-circle me-2"></i>¡Curso Listo!</h5>
-                <p><strong>${data.title || 'Tu curso'}</strong> está listo para empezar.</p>
+            <div class="alert alert-${statusClass}">
+                <h5><i class="fas fa-check-circle me-2"></i>¡Curso Disponible!</h5>
+                <p><strong>${data.title || 'Tu curso'}</strong></p>
+                <p class="mb-3">${statusMessage}</p>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                     <a href="/course/${courseId}/" class="btn btn-primary">
                         <i class="fas fa-play me-2"></i>Ver Curso
