@@ -17,10 +17,14 @@ logger = logging.getLogger(__name__)
 @shared_task(bind=True)
 def generate_course_metadata(self, course_id: str):
     """
-    Fase 1: Generar metadata del curso (título, descripción, módulos, podcast)
+    Fase 1: Generar metadata completa del curso usando Claude AI
     
-    Esta es la primera fase que se ejecuta inmediatamente después de crear el curso.
-    Genera la estructura básica y el podcast introductorio.
+    Esta fase genera toda la estructura del curso, incluyendo:
+    - Título y descripción
+    - Lista de módulos
+    - Temas principales
+    - Script del podcast
+    - Audio del podcast
     """
     start_time = time.time()
     course = None
@@ -103,7 +107,7 @@ def generate_course_metadata(self, course_id: str):
             
             logger.info(f"Metadata generada exitosamente para curso {course_id} en {duration:.2f}s")
             
-            # Activar inmediatamente la generación del módulo 1 (flujo original)
+            # Activar inmediatamente la generación del módulo 1 en background
             generate_module_1.delay(str(course_id))
             
         finally:

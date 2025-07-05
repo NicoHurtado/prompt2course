@@ -214,6 +214,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
+
     @action(detail=True, methods=['post'])
     def next_module(self, request, pk=None):
         """

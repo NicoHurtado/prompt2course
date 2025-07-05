@@ -249,8 +249,9 @@
                         return;
                     }
                     
-                    // Permitir acceso desde metadata_ready, ready o complete
-                    if (data.status === 'metadata_ready' || data.status === 'ready' || data.status === 'complete') {
+                    // Permitir acceso desde metadata_ready en adelante (incluso durante generación)
+                    if (data.status === 'metadata_ready' || data.status === 'generating_module_1' || 
+                        data.status === 'ready' || data.status === 'generating_remaining' || data.status === 'complete') {
                         showCourseReady(courseId, data);
                         
                         // Solo parar polling cuando esté complete
@@ -303,8 +304,14 @@
         if (data.status === 'metadata_ready') {
             statusMessage = 'Estructura del curso lista. El contenido se está generando en background.';
             statusClass = 'info';
+        } else if (data.status === 'generating_module_1') {
+            statusMessage = 'Puedes explorar la estructura mientras generamos el primer módulo.';
+            statusClass = 'info';
         } else if (data.status === 'ready') {
             statusMessage = 'Primer módulo listo. Los módulos restantes se están generando mientras navegas.';
+            statusClass = 'success';
+        } else if (data.status === 'generating_remaining') {
+            statusMessage = 'Primer módulo disponible. Módulos restantes generándose en background.';
             statusClass = 'success';
         } else if (data.status === 'complete') {
             statusMessage = 'Curso completamente generado y listo para consumir.';

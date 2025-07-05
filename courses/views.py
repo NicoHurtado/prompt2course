@@ -176,3 +176,5 @@ def course_status(request, course_id):
         'title': course.title,
         'description': course.description,
     })
+
+
