@@ -156,10 +156,10 @@ AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default='')
 AWS_S3_BUCKET = env('AWS_S3_BUCKET', default='prompt2course')
 AWS_REGION = env('AWS_REGION', default='us-east-2')
 
-# AWS Polly Configuration
-AWS_POLLY_ENGINE = env('AWS_POLLY_ENGINE', default='neural')
+# AWS Polly Configuration  
+AWS_POLLY_ENGINE = env('AWS_POLLY_ENGINE', default='standard')
 AWS_POLLY_VOICE_FEMALE = env('AWS_POLLY_VOICE_FEMALE', default='Lupe')
-AWS_POLLY_VOICE_MALE = env('AWS_POLLY_VOICE_MALE', default='Pedro')
+AWS_POLLY_VOICE_MALE = env('AWS_POLLY_VOICE_MALE', default='Miguel')
 
 # Celery Configuration
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')

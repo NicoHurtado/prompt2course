@@ -9,6 +9,13 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+    environment:
+      - DEBUG=True
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_URL=redis://redis:6379/1
+      - SECRET_KEY=django-insecure-change-this-key-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
     env_file:
       - .env
     depends_on:
@@ -21,6 +28,12 @@ services:
     entrypoint: ["/app/celery-entrypoint.sh"]
     volumes:
       - .:/app
+    environment:
+      - DEBUG=True
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CACHE_URL=redis://redis:6379/1
+      - SECRET_KEY=django-insecure-change-this-key-in-production
     env_file:
       - .env
     depends_on:

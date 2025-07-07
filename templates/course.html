@@ -62,6 +62,12 @@
                         Continuar
                     </a>
                     {% endif %}
+                    {% if course.podcast_audio_url %}
+                    <button class="btn btn-outline-primary btn-sm" onclick="openPodcastPlayer()">
+                        <i class="fas fa-podcast me-2"></i>
+                        Reproducir Podcast
+                    </button>
+                    {% endif %}
                     <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-home me-2"></i>
                         Inicio
@@ -600,6 +606,160 @@ function pauseAudioSimulator() {
         clearInterval(audioInterval);
     }
 }
+
+function openPodcastPlayer() {
+    // Crear modal si no existe
+    let modal = document.getElementById('podcastModal');
+    if (!modal) {
+        createPodcastModal();
+        modal = document.getElementById('podcastModal');
+    }
+    
+    // Mostrar modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    // Auto-reproducir si hay audio disponible con manejo de errores mejorado
+    setTimeout(() => {
+        const audio = document.getElementById('podcastAudio');
+        if (audio) {
+            // Agregar event listeners para debugging
+            audio.addEventListener('loadstart', () => console.log('🎵 Audio: Iniciando carga'));
+            audio.addEventListener('canplay', () => console.log('✅ Audio: Listo para reproducir'));
+            audio.addEventListener('error', (e) => console.error('❌ Audio Error:', e));
+            
+            audio.play().catch(e => console.log('⚠️ Auto-play prevented:', e));
+        } else {
+            console.warn('⚠️ Audio element no encontrado');
+        }
+    }, 500);
+}
+
+function createPodcastModal() {
+    // Obtener datos del curso desde variables JavaScript
+    const courseTitle = '{{ course.title|escapejs }}';
+    const podcastUrl = '{{ course.podcast_audio_url|escapejs }}';
+    const podcastScript = `{{ course.podcast_script|escapejs }}`;
+    const courseId = '{{ course.id }}';
+    
+    // DEBUG: Mostrar información en consola
+    console.log('🎙️ DEBUG Podcast Modal:', {
+        courseTitle: courseTitle,
+        podcastUrl: podcastUrl,
+        hasScript: !!podcastScript,
+        courseId: courseId
+    });
+    
+    let audioPlayerHTML = '';
+    if (podcastUrl && podcastUrl.trim() !== '') {
+        audioPlayerHTML = `
+            <div class="audio-player-container">
+                <audio id="podcastAudio" controls class="w-100" preload="metadata" crossorigin="anonymous">
+                    <source src="${podcastUrl}" type="audio/mpeg">
+                    Tu navegador no soporta el reproductor de audio.
+                </audio>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Conversación entre María (voz femenina) y Carlos (voz masculina)
+                    </small>
+                </div>
+                <div class="mt-2">
+                    <small class="text-info">
+                        <i class="fas fa-link me-1"></i>
+                        URL: ${podcastUrl.substring(0, 60)}...
+                    </small>
+                </div>
+            </div>
+        `;
+    } else {
+        audioPlayerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                El podcast conversacional se está generando. Intenta de nuevo en unos momentos.
+                <br><small class="text-muted">Estado: URL vacía o no válida</small>
+            </div>
+        `;
+    }
+    
+    let transcriptHTML = '';
+    if (podcastScript) {
+        transcriptHTML = `
+            <div class="mt-4">
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#modalPodcastScript">
+                    <i class="fas fa-file-text me-1"></i>
+                    Ver Transcripción Completa
+                </button>
+                <div class="collapse mt-3" id="modalPodcastScript">
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit; font-size: 0.9rem;">${podcastScript}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    const modalHTML = `
+        <div class="modal fade" id="podcastModal" tabindex="-1" aria-labelledby="podcastModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="podcastModalLabel">
+                            <i class="fas fa-podcast me-2"></i>
+                            Conversación Introductoria - ${courseTitle.substring(0, 40)}${courseTitle.length > 40 ? '...' : ''}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            <div class="d-inline-flex align-items-center bg-light rounded-pill px-4 py-2">
+                                <div class="me-3">
+                                    <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                    <div class="small text-muted">María</div>
+                                </div>
+                                <div class="mx-2">
+                                    <i class="fas fa-comments text-muted"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="fas fa-user-circle fa-2x text-success"></i>
+                                    <div class="small text-muted">Carlos</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <p class="mb-0">
+                                <strong>¡Escucha la conversación especial!</strong><br>
+                                María y Carlos conversan sobre el curso, qué aprenderás 
+                                y por qué es importante en menos de 1 minuto y 30 segundos.
+                            </p>
+                        </div>
+                        
+                        ${audioPlayerHTML}
+                        ${transcriptHTML}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>
+                            Cerrar
+                        </button>
+                        <a href="/course/${courseId}/module/modulo_1/" class="btn btn-success">
+                            <i class="fas fa-rocket me-2"></i>
+                            ¡Empezar Curso!
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Agregar modal al body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
 </script>
 {% endblock %}
 
@@ -626,6 +786,24 @@ function pauseAudioSimulator() {
     
     audio {
         height: 40px;
+        border-radius: 8px;
+    }
+    
+    .audio-player-container {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+    }
+    
+    #podcastAudio {
+        width: 100%;
+        height: 50px;
+        border-radius: 8px;
+    }
+    
+    .modal-body .alert {
+        border-radius: 10px;
     }
     
     .module-progress {

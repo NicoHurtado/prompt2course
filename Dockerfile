@@ -5,9 +5,9 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Instalar dependencias del sistema
+# Instalar dependencias del sistema (incluyendo ffmpeg para pydub)
 RUN apt-get update && \
-    apt-get install -y build-essential libpq-dev gcc sqlite3 redis-tools && \
+    apt-get install -y build-essential libpq-dev gcc sqlite3 redis-tools ffmpeg && \
     apt-get clean
 
 # Crear directorio de trabajo
