@@ -6,19 +6,34 @@ from django.views.decorators.http import require_http_methods
 import json
 from .models import Course, Module, UserProgress
 from django.urls import reverse
-from generation.tasks import generate_course_metadata, generate_remaining_modules
+from generation.tasks import generate_course_metadata, generate_remaining_modules, regenerate_missing_modules
 
 
+@login_required
 def index(request):
     """Vista principal para crear cursos"""
-    return render(request, 'index.html')
+    # Verificar si el usuario puede crear más cursos
+    if not request.user.can_create_course():
+        return redirect('users:dashboard')
+    
+    context = {
+        'can_create_more': request.user.can_create_course(),
+    }
+    return render(request, 'index.html', context)
 
 
+@login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def simple_course_create(request):
     """Vista para crear cursos reales usando la API de Claude"""
     try:
+        # Verificar si el usuario puede crear más cursos
+        if not request.user.can_create_course():
+            return JsonResponse({
+                'error': f'Has alcanzado el límite de cursos para tu membresía {request.user.get_membership_display()}. Actualiza tu plan para crear más cursos.'
+            }, status=403)
+        
         # Obtener datos del formulario
         user_prompt = request.POST.get('user_prompt', '').strip()
         user_level = request.POST.get('user_level', 'principiante')
@@ -45,6 +60,7 @@ def simple_course_create(request):
         
         # Crear curso con status inicial
         course = Course.objects.create(
+            user=request.user,
             user_prompt=user_prompt,
             user_level=user_level,
             user_interests=user_interests,
@@ -69,9 +85,10 @@ def simple_course_create(request):
         }, status=500)
 
 
+@login_required
 def course_view(request, course_id):
     """Vista del curso completo"""
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(Course, id=course_id, user=request.user)
     
     # Obtener progreso del usuario si está autenticado
     user_progress = None
@@ -91,16 +108,17 @@ def course_view(request, course_id):
         'course': course,
         'user_progress': user_progress,
         'breadcrumbs': [
-            (reverse('index'), 'Inicio'),
+            (reverse('users:dashboard'), 'Dashboard'),
             (None, course.title),
         ],
     }
     return render(request, 'course.html', context)
 
 
+@login_required
 def course_metadata(request, course_id):
     """Vista de metadata del curso"""
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(Course, id=course_id, user=request.user)
     
     context = {
         'course': course,
@@ -108,9 +126,10 @@ def course_metadata(request, course_id):
     return render(request, 'metadata.html', context)
 
 
+@login_required
 def module_view(request, course_id, module_id):
     """Vista de módulo individual"""
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(Course, id=course_id, user=request.user)
     module = get_object_or_404(Module, course=course, module_id=module_id)
     
     # AUTO-GENERACIÓN: Si el módulo no tiene contenido, activar generación (fallback)
@@ -157,7 +176,7 @@ def module_view(request, course_id, module_id):
         'next_module': next_module,
         'user_progress': user_progress,
         'breadcrumbs': [
-            (reverse('index'), 'Inicio'),
+            (reverse('users:dashboard'), 'Dashboard'),
             (reverse('course_view', kwargs={'course_id': course.id}), course.title),
             (None, module.title),
         ],
@@ -165,9 +184,10 @@ def module_view(request, course_id, module_id):
     return render(request, 'module.html', context)
 
 
+@login_required
 def course_status(request, course_id):
     """API endpoint para verificar el estado del curso"""
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(Course, id=course_id, user=request.user)
     
     return JsonResponse({
         'status': course.status,
@@ -176,5 +196,42 @@ def course_status(request, course_id):
         'title': course.title,
         'description': course.description,
     })
+
+
+@login_required
+@require_http_methods(["POST"])
+def regenerate_course_modules(request, course_id):
+    """Vista para regenerar módulos faltantes de un curso"""
+    try:
+        course = get_object_or_404(Course, id=course_id, user=request.user)
+        
+        # Verificar que hay módulos faltantes
+        missing_modules = []
+        for module_number in range(1, course.total_modules + 1):
+            existing_module = Module.objects.filter(course=course, module_order=module_number).first()
+            if not existing_module or existing_module.chunks.count() == 0:
+                missing_modules.append(module_number)
+        
+        if not missing_modules:
+            return JsonResponse({
+                'error': False,
+                'message': 'No hay módulos faltantes en este curso',
+                'missing_modules': []
+            })
+        
+        # Iniciar tarea de regeneración
+        regenerate_missing_modules.delay(str(course.id))
+        
+        return JsonResponse({
+            'error': False,
+            'message': f'Iniciando regeneración de {len(missing_modules)} módulos faltantes',
+            'missing_modules': missing_modules
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': True,
+            'message': f'Error al iniciar regeneración: {str(e)}'
+        }, status=500)
 
 

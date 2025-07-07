@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Cursia - Crea Cursos Inteligentes en Minutos{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6">
+                <div class="fade-in">
+                    <h1 class="display-4 fw-bold text-dark mb-4">
+                        Crea cursos <span style="color: var(--primary-color);">inteligentes</span> en minutos
+                    </h1>
+                    <p class="lead text-muted mb-4">
+                        Transforma cualquier idea en un curso completo e interactivo usando inteligencia artificial. 
+                        Con Cursia, generas contenido de calidad profesional en tiempo récord.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <a href="{% url 'users:signup' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>
+                            Crear mi primera cuenta gratis
+                        </a>
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Ya tengo cuenta
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <div class="card shadow-lg border-0" style="background: linear-gradient(135deg, var(--primary-light) 0%, white 100%);">
+                        <div class="card-body p-5">
+                            <div class="row g-4">
+                                <div class="col-6">
+                                    <div class="stats-card h-100">
+                                        <div class="stats-number">⚡</div>
+                                        <div class="stats-label">Generación instantánea</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stats-card h-100">
+                                        <div class="stats-number">🎯</div>
+                                        <div class="stats-label">Contenido personalizado</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stats-card h-100">
+                                        <div class="stats-number">📱</div>
+                                        <div class="stats-label">Acceso multiplataforma</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stats-card h-100">
+                                        <div class="stats-number">🏆</div>
+                                        <div class="stats-label">Calidad profesional</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold mb-3">¿Por qué elegir Cursia?</h2>
+                <p class="text-muted">La plataforma más avanzada para crear cursos educativos</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 text-center">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-brain" style="font-size: 3rem; color: var(--primary-color);"></i>
+                        </div>
+                        <h5 class="fw-bold">IA Avanzada</h5>
+                        <p class="text-muted">
+                            Utilizamos Claude AI para generar contenido educativo de alta calidad, 
+                            estructurado y pedagógicamente sólido.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 text-center">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-clock" style="font-size: 3rem; color: var(--primary-color);"></i>
+                        </div>
+                        <h5 class="fw-bold">Súper Rápido</h5>
+                        <p class="text-muted">
+                            Genera cursos completos en minutos, no semanas. 
+                            Desde la estructura hasta el contenido multimedia.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 text-center">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-users" style="font-size: 3rem; color: var(--primary-color);"></i>
+                        </div>
+                        <h5 class="fw-bold">Para Todos</h5>
+                        <p class="text-muted">
+                            Perfecto para educadores, empresas, creadores de contenido 
+                            y cualquiera que quiera enseñar.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works Section -->
+<section class="py-5" style="background-color: var(--bg-light);">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold mb-3">¿Cómo funciona?</h2>
+                <p class="text-muted">En solo 3 pasos tienes tu curso listo</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <div style="width: 80px; height: 80px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <span style="color: white; font-size: 2rem; font-weight: bold;">1</span>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">Describe tu curso</h5>
+                    <p class="text-muted">
+                        Cuéntanos qué quieres enseñar, el nivel de tus estudiantes 
+                        y cualquier detalle específico.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <div style="width: 80px; height: 80px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <span style="color: white; font-size: 2rem; font-weight: bold;">2</span>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">IA genera el contenido</h5>
+                    <p class="text-muted">
+                        Nuestra inteligencia artificial crea la estructura, 
+                        contenido, ejemplos y recursos automáticamente.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <div style="width: 80px; height: 80px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <span style="color: white; font-size: 2rem; font-weight: bold;">3</span>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">¡Listo para enseñar!</h5>
+                    <p class="text-muted">
+                        Tu curso está completo con videos, ejercicios, 
+                        evaluaciones y todo lo que necesitas.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center">
+                    <h2 class="fw-bold mb-3">¿Listo para crear tu primer curso?</h2>
+                    <p class="text-muted mb-4">Únete a miles de educadores que ya confían en Cursia</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'users:signup' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>
+                            Empezar gratis ahora
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

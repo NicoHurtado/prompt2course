@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Prompt2Course (P2C) - Generador Inteligente de Cursos{% endblock %}</title>
+    <title>{% block title %}Cursia - Plataforma Inteligente de Cursos{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
@@ -20,34 +25,217 @@
     <!-- highlight.js para resaltado de sintaxis en bloques de código -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha512-+zfnVmP7Xgkn4HiwUO6+cDEHXT24w2cV5096bzmUiy5JN5KRaHHHkO7KXb7EKTo21xpzu4uhPcXqg4XH/wsjIA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- Estilos personalizados -->
+    <!-- Estilos personalizados de Cursia -->
     <style>
         :root {
-            --primary-color: #2563eb;
+            --primary-color: #38b6ff;
+            --primary-hover: #2ba3eb;
+            --primary-light: #e7f7ff;
             --secondary-color: #64748b;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --bg-light: #f8fafc;
+            --border-light: #e2e8f0;
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f8fafc;
+            font-weight: 400;
+            background-color: white;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* Tipografía */
+        h1, h2, h3, h4, h5, h6,
+        .navbar-brand,
+        .btn,
+        .card-title {
+            font-weight: 700; /* Inter Bold */
         }
         
         .navbar-brand {
-            font-weight: 700;
+            font-weight: 800; /* Extra Bold para el logo */
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background-color: white !important;
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 0;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: color 0.2s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
             color: var(--primary-color) !important;
         }
         
+        /* Botones */
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s ease;
         }
         
         .btn-primary:hover {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 182, 255, 0.3);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .course-card {
+            border: 1px solid var(--border-light);
+            background: white;
+        }
+        
+        .course-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 25px rgba(56, 182, 255, 0.15);
+        }
+        
+        /* Badges y status */
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .badge-generating {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .badge-ready {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-complete {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .badge-failed {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        /* Progress bars */
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background-color: var(--bg-light);
+        }
+        
+        .progress-bar {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+        }
+        
+        /* Forms */
+        .form-control {
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(56, 182, 255, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .alert-info {
+            background-color: var(--primary-light);
+            color: #1e40af;
+        }
+        
+        /* Containers y layout */
+        .main-container {
+            min-height: calc(100vh - 76px);
+            background: white;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-light) 0%, white 100%);
+            padding: 4rem 0;
+        }
+        
+        /* Animaciones y efectos */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .spinner-border-sm {
@@ -55,28 +243,8 @@
             height: 1rem;
         }
         
-        .course-card {
-            border: none;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            transition: all 0.2s;
-        }
-        
-        .course-card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .status-badge {
-            font-size: 0.8rem;
-            padding: 0.3rem 0.6rem;
-        }
-        
-        .progress-bar {
-            height: 6px;
-        }
-        
         .chunk-content {
-            line-height: 1.6;
+            line-height: 1.7;
             font-size: 1.1rem;
         }
         
@@ -85,6 +253,8 @@
             width: 100%;
             height: 0;
             padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            border-radius: 12px;
+            overflow: hidden;
         }
         
         .video-container iframe {
@@ -94,9 +264,9 @@
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 8px;
         }
         
+        /* HTMX indicators */
         .htmx-indicator {
             display: none;
         }
@@ -115,17 +285,27 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
         }
         
+        /* Markdown styling */
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: none;
+            margin: 0 auto;
+            padding: 0;
+            background: white;
+        }
+        
         .markdown-body pre {
-            background-color: #f0f2f5; /* tono gris claro para diferenciar del fondo blanco */
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
             padding: 1rem;
             position: relative;
             overflow: auto;
@@ -133,10 +313,9 @@
         }
 
         .markdown-body pre:hover {
-            background-color: #e7e9ec; /* ligero hover para llamar la atención */
+            background-color: #f1f5f9;
         }
 
-        /* Botón de copia */
         .copy-code-btn {
             opacity: 0.6;
             transition: opacity 0.2s;
@@ -145,44 +324,73 @@
             opacity: 1;
         }
 
-        /* --- Colores personalizados para highlight.js --- */
         .markdown-body .hljs-keyword,
         .markdown-body .hljs-built_in,
         .markdown-body .hljs-title {
-            color: #15803d; /* verde */
+            color: #15803d;
         }
 
         .markdown-body .hljs-string {
-            color: #d97706; /* naranja */
+            color: #d97706;
         }
 
         .markdown-body .hljs-number,
         .markdown-body .hljs-literal {
-            color: #2563eb; /* azul principal */
+            color: var(--primary-color);
         }
 
-        /* Algunos lenguajes marcan paréntesis como 'punctuation' u 'operator' */
         .markdown-body .hljs-punctuation,
         .markdown-body .hljs-operator {
-            color: #2563eb;
+            color: var(--primary-color);
         }
 
-        .markdown-body a.p2c-link {
-            color: #1d4ed8;
-            text-decoration: underline;
+        .markdown-body a {
+            color: var(--primary-color);
+            text-decoration: none;
             transition: color 0.2s;
         }
-        .markdown-body a.p2c-link:hover {
-            color: #2563eb;
+        
+        .markdown-body a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
         }
 
-        /* Inline code (backticks) to highlight filenames/commands */
         .markdown-body code:not(pre code) {
-            color: #b91c1c; /* rojo oscuro */
+            color: #b91c1c;
             background-color: #fef2f2;
             padding: 0.15em 0.35em;
             border-radius: 4px;
             font-weight: 600;
+        }
+        
+        /* Dashboard specific styles */
+        .stats-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
     
@@ -193,11 +401,11 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'users:dashboard' %}{% else %}{% url 'users:home' %}{% endif %}">
                 <i class="fas fa-graduation-cap me-2"></i>
-                Prompt2Course
+                Cursia
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -205,211 +413,88 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home me-1"></i>
-                            Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showAbout()">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Acerca de
-                        </a>
-                    </li>
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
-                <span class="navbar-text ms-lg-3 d-none d-lg-inline" id="greeting"></span>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>
+                                {{ user.first_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">
+                                    <i class="fas fa-user me-1"></i>Mi Perfil
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:login' %}">Iniciar Sesión</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{% url 'users:signup' %}">Crear Cuenta</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Contenido principal -->
-    <main class="container my-4">
-        {% if breadcrumbs %}
-        <nav aria-label="breadcrumb" class="mb-3 animate__animated animate__fadeInDown">
-            <ol class="breadcrumb">
-                {% for crumb in breadcrumbs %}
-                    {% if forloop.last or not crumb.0 %}
-                        <li class="breadcrumb-item active" aria-current="page">{{ crumb.1 }}</li>
-                    {% else %}
-                        <li class="breadcrumb-item"><a href="{{ crumb.0 }}">{{ crumb.1 }}</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ol>
-        </nav>
-        {% endif %}
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-container">
         {% block content %}{% endblock %}
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-top mt-5 py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6 class="text-muted">Prompt2Course (P2C)</h6>
-                    <p class="text-muted small">
-                        Sistema inteligente de generación de cursos educativos en menos de 10 segundos.
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <small class="text-muted">
-                        Powered by Claude AI, AWS Polly & YouTube
-                    </small>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- highlight.js biblioteca de resaltado de sintaxis -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-VGCqKqzXx3gsEIkXofMvX9N5zcqiRPJszrKDlL8oQA9unv0BFFMypSxVYU6cRf13ZQMDu1inECPw9lF2ijh3NQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    
-    <!-- Scripts personalizados -->
+    <!-- highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>hljs.highlightAll();</script>
+
+    <!-- Copy to clipboard functionality -->
     <script>
-        // Configuración global de HTMX
-        htmx.config.defaultSwapStyle = 'innerHTML';
-        htmx.config.defaultSwapDelay = 0;
-        htmx.config.defaultSettleDelay = 100;
-        
-        // Función para mostrar información
-        function showAbout() {
-            alert('Prompt2Course (P2C) v1.0\n\nSistema inteligente que genera cursos educativos completos usando IA, síntesis de voz y contenido multimedia en menos de 10 segundos.');
-        }
-        
-        // Función para copiar texto al portapapeles
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Copiado al portapapeles', 'success');
-            });
-        }
-        
-        // Sistema de notificaciones toast
-        function showToast(message, type = 'info') {
-            const toastContainer = document.getElementById('toast-container') || createToastContainer();
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-bg-${type} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            toastContainer.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            // Limpiar después de ocultarse
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
-        
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            container.style.zIndex = '11';
-            document.body.appendChild(container);
-            return container;
-        }
-        
-        // Event listeners para HTMX
-        document.addEventListener('htmx:beforeRequest', function(event) {
-            console.log('HTMX Request iniciado:', event.detail.xhr.responseURL);
-        });
-        
-        document.addEventListener('htmx:afterRequest', function(event) {
-            if (event.detail.xhr.status >= 400) {
-                showToast('Error en la solicitud', 'danger');
-            }
-        });
-        
-        document.addEventListener('htmx:responseError', function(event) {
-            showToast('Error de conexión', 'danger');
-        });
-
-        // --- Resaltado de sintaxis y botones de copia ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar highlight.js
-            if (window.hljs) {
-                document.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
-            }
-
-            // Greeting with stored name
-            const storedName = localStorage.getItem('p2c_name');
-            const greetingSpan = document.getElementById('greeting');
-            if (storedName && greetingSpan) {
-                greetingSpan.textContent = `Hola, ${storedName}!`;
-            }
-
-            // Mostrar modal para pedir nombre si no existe
-            if (!storedName) {
-                showNameModal();
-            }
-
-            function showNameModal() {
-                const modalHtml = `
-                <div class="modal fade" id="nameModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">¡Bienvenido a P2C!</h5>
-                            </div>
-                            <div class="modal-body">
-                                <p>¿Cómo te llamas?</p>
-                                <input type="text" id="nameInput" class="form-control" placeholder="Tu nombre">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" id="saveNameBtn">Guardar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                const nameModal = new bootstrap.Modal(document.getElementById('nameModal'));
-                nameModal.show();
-
-                document.getElementById('saveNameBtn').addEventListener('click', () => {
-                    const name = document.getElementById('nameInput').value.trim();
-                    if (name) {
-                        localStorage.setItem('p2c_name', name);
-                        greetingSpan.textContent = `Hola, ${name}!`;
-                        nameModal.hide();
-                    } else {
-                        alert('Por favor ingresa tu nombre');
-                    }
-                });
-            }
-
-            // Añadir botón de copia a cada bloque de código
-            document.querySelectorAll('pre code').forEach((codeBlock) => {
-                const pre = codeBlock.parentElement;
-                if (pre.querySelector('.copy-code-btn')) return; // evitar duplicados
-
-                pre.style.position = 'relative';
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'btn btn-light btn-sm position-absolute copy-code-btn';
-                copyBtn.style.top = '8px';
-                copyBtn.style.right = '8px';
-                copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-
-                copyBtn.addEventListener('click', () => {
-                    const codeText = codeBlock.innerText;
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(codeText).then(() => showToast('Código copiado', 'success')).catch(() => fallbackCopy(codeText));
-                    } else {
-                        fallbackCopy(codeText);
-                    }
-                });
-
-                pre.appendChild(copyBtn);
-            });
+        // Añadir botones de copia a bloques de código
+        document.querySelectorAll('pre code').forEach((codeBlock) => {
+            const pre = codeBlock.parentNode;
+            const button = document.createElement('button');
+            button.className = 'btn btn-sm btn-outline-secondary copy-code-btn position-absolute top-0 end-0 m-2';
+            button.innerHTML = '<i class="fas fa-copy"></i>';
+            button.onclick = () => {
+                navigator.clipboard.writeText(codeBlock.textContent);
+                button.innerHTML = '<i class="fas fa-check text-success"></i>';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i>';
+                }, 2000);
+            };
+            pre.style.position = 'relative';
+            pre.appendChild(button);
         });
     </script>
     

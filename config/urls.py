@@ -27,15 +27,21 @@ urlpatterns = [
     # API REST
     path('api/', include('api.urls')),
     
-    # Frontend HTML
-    path('', course_views.index, name='index'),
+    # Authentication and User Management
+    path('', include('users.urls')),
+    
+    # Course Management
     path('course/<uuid:course_id>/', course_views.course_view, name='course_view'),
     path('course/<uuid:course_id>/metadata/', course_views.course_metadata, name='course_metadata'),
     path('course/<uuid:course_id>/module/<str:module_id>/', course_views.module_view, name='module_view'),
     path('course/<uuid:course_id>/status/', course_views.course_status, name='course_status'),
     
-    # Demo course creation (sin APIs externas)
-    path('demo-create-course/', course_views.simple_course_create, name='demo_create_course'),
+    # Course creation
+    path('create-course/', course_views.simple_course_create, name='create_course'),
+    path('new-course/', course_views.index, name='new_course'),
+    
+    # Course management
+    path('course/<uuid:course_id>/regenerate/', course_views.regenerate_course_modules, name='regenerate_course_modules'),
 ]
 
 # Configuración para archivos estáticos y media en desarrollo

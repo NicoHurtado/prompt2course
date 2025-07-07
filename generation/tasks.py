@@ -321,6 +321,7 @@ def generate_module_1(self, course_id: str):
             # Crear chunks del módulo
             chunks_data = module_data.get('chunks', [])
             first_video_for_module = None  # Para guardar el primer video en module.video_data
+            used_video_ids = set()  # Para el módulo 1, empezamos sin videos usados
             
             for chunk_data in chunks_data:
                 chunk = Chunk.objects.create(
@@ -339,32 +340,45 @@ def generate_module_1(self, course_id: str):
                         youtube_service.search_videos_for_chunk(chunk_data, course_metadata)
                     )
                     
-                    if videos:
-                        video_data = videos[0]  # Tomar el primer video
+                    # Para módulo 1, seleccionar videos únicos dentro del mismo módulo
+                    unique_video = None
+                    for video_candidate in videos:
+                        candidate_id = video_candidate.get('video_id', '')
+                        if candidate_id and candidate_id not in used_video_ids:
+                            unique_video = video_candidate
+                            used_video_ids.add(candidate_id)  # Agregar a usados
+                            break
+                    
+                    if unique_video:
                         Video.objects.create(
                             chunk=chunk,
-                            video_id=video_data.get('video_id', ''),
-                            title=video_data.get('title', ''),
-                            url=video_data.get('url', ''),
-                            embed_url=video_data.get('embed_url', ''),
-                            thumbnail_url=video_data.get('thumbnail_url', ''),
-                            duration=video_data.get('duration', 'N/A'),
-                            view_count=video_data.get('view_count', 0)
+                            video_id=unique_video.get('video_id', ''),
+                            title=unique_video.get('title', ''),
+                            url=unique_video.get('url', ''),
+                            embed_url=unique_video.get('embed_url', ''),
+                            thumbnail_url=unique_video.get('thumbnail_url', ''),
+                            duration=unique_video.get('duration', 'N/A'),
+                            view_count=unique_video.get('view_count', 0)
                         )
                         
-                        # Guardar el primer video encontrado para el módulo
+                        # Guardar el primer video único encontrado para el módulo
                         if first_video_for_module is None:
-                            first_video_for_module = video_data
+                            first_video_for_module = unique_video
+                            logger.info(f"Video único asignado al módulo 1: {unique_video.get('title', 'Sin título')}")
+                    else:
+                        logger.warning(f"No se encontraron videos únicos para chunk {chunk.chunk_id} en módulo 1")
                         
                 except Exception as video_error:
                     logger.warning(f"Error buscando video para chunk {chunk.chunk_id}: {video_error}")
                     # Continuar sin video si falla la búsqueda
             
-            # Asignar el primer video encontrado al campo video_data del módulo
+            # Asignar el primer video único encontrado al campo video_data del módulo
             if first_video_for_module:
                 module.video_data = first_video_for_module
                 module.save()
-                logger.info(f"Video principal asignado al módulo: {first_video_for_module.get('title', 'Sin título')}")
+                logger.info(f"Video principal único asignado al módulo 1: {first_video_for_module.get('title', 'Sin título')}")
+            else:
+                logger.warning("No se pudo asignar video principal único al módulo 1")
             
             # Crear quiz del módulo
             quiz_data = module_data.get('quiz', [])
@@ -460,11 +474,15 @@ def generate_remaining_modules(self, course_id: str):
         try:
             # Generar módulos 2, 3, 4...
             for module_number in range(2, total_modules + 1):
-                # Verificar si el módulo ya tiene contenido
+                # Verificar si el módulo ya tiene contenido COMPLETO
                 existing_module = Module.objects.filter(course=course, module_order=module_number).first()
                 if existing_module and existing_module.chunks.count() > 0:
-                    logger.info(f"Módulo {module_number} ya tiene contenido, saltando")
-                    continue  # Skip solo si ya tiene chunks
+                    logger.info(f"Módulo {module_number} ya tiene contenido completo, saltando")
+                    continue  # Skip solo si ya tiene chunks completos
+                
+                # Si existe pero sin chunks, lo vamos a actualizar con contenido
+                if existing_module and existing_module.chunks.count() == 0:
+                    logger.info(f"Módulo {module_number} existe pero sin contenido, generando contenido...")
                 
                 try:
                     logger.info(f"Generando módulo {module_number}")
@@ -502,6 +520,18 @@ def generate_remaining_modules(self, course_id: str):
                             resources=module_data.get('resources', {})
                         )
                     
+                    # Obtener videos ya usados en otros módulos del curso para evitar duplicados
+                    used_video_ids = set()
+                    for existing_mod in course.modules.exclude(id=module.id):
+                        if existing_mod.video_data and 'video_id' in existing_mod.video_data:
+                            used_video_ids.add(existing_mod.video_data['video_id'])
+                        # También obtener videos de chunks
+                        for chunk in existing_mod.chunks.all():
+                            if hasattr(chunk, 'video') and chunk.video:
+                                used_video_ids.add(chunk.video.video_id)
+                    
+                    logger.info(f"Videos ya usados en el curso: {len(used_video_ids)}")
+                    
                     # Crear chunks y videos
                     chunks_data = module_data.get('chunks', [])
                     first_video_for_module = None  # Para guardar el primer video en module.video_data
@@ -523,31 +553,44 @@ def generate_remaining_modules(self, course_id: str):
                                 youtube_service.search_videos_for_chunk(chunk_data, course_metadata)
                             )
                             
-                            if videos:
-                                video_data = videos[0]
+                            # Filtrar videos ya usados y seleccionar uno único
+                            unique_video = None
+                            for video_candidate in videos:
+                                candidate_id = video_candidate.get('video_id', '')
+                                if candidate_id and candidate_id not in used_video_ids:
+                                    unique_video = video_candidate
+                                    used_video_ids.add(candidate_id)  # Agregar a usados
+                                    break
+                            
+                            if unique_video:
                                 Video.objects.create(
                                     chunk=chunk,
-                                    video_id=video_data.get('video_id', ''),
-                                    title=video_data.get('title', ''),
-                                    url=video_data.get('url', ''),
-                                    embed_url=video_data.get('embed_url', ''),
-                                    thumbnail_url=video_data.get('thumbnail_url', ''),
-                                    duration=video_data.get('duration', 'N/A'),
-                                    view_count=video_data.get('view_count', 0)
+                                    video_id=unique_video.get('video_id', ''),
+                                    title=unique_video.get('title', ''),
+                                    url=unique_video.get('url', ''),
+                                    embed_url=unique_video.get('embed_url', ''),
+                                    thumbnail_url=unique_video.get('thumbnail_url', ''),
+                                    duration=unique_video.get('duration', 'N/A'),
+                                    view_count=unique_video.get('view_count', 0)
                                 )
                                 
-                                # Guardar el primer video encontrado para el módulo
+                                # Guardar el primer video único encontrado para el módulo
                                 if first_video_for_module is None:
-                                    first_video_for_module = video_data
+                                    first_video_for_module = unique_video
+                                    logger.info(f"Video único asignado al módulo {module_number}: {unique_video.get('title', 'Sin título')}")
+                            else:
+                                logger.warning(f"No se encontraron videos únicos para chunk {chunk.chunk_id}")
                                     
                         except Exception as video_error:
                             logger.warning(f"Error buscando video para chunk {chunk.chunk_id}: {video_error}")
                     
-                    # Asignar el primer video encontrado al campo video_data del módulo
+                    # Asignar el primer video único encontrado al campo video_data del módulo
                     if first_video_for_module:
                         module.video_data = first_video_for_module
                         module.save()
-                        logger.info(f"Video principal asignado al módulo {module_number}: {first_video_for_module.get('title', 'Sin título')}")
+                        logger.info(f"Video principal único asignado al módulo {module_number}: {first_video_for_module.get('title', 'Sin título')}")
+                    else:
+                        logger.warning(f"No se pudo asignar video principal único al módulo {module_number}")
                     
                     # Crear quiz
                     quiz_data = module_data.get('quiz', [])
@@ -615,6 +658,222 @@ def generate_remaining_modules(self, course_id: str):
                 course=course,
                 action=GenerationLog.ActionChoices.ERROR,
                 message=f"Error en generación de módulos restantes: {str(e)}",
+                duration_seconds=time.time() - start_time
+            )
+        
+        raise
+
+
+@shared_task(bind=True)
+def regenerate_missing_modules(self, course_id: str):
+    """
+    Tarea para regenerar módulos faltantes o sin contenido
+    
+    Esta tarea identifica módulos que deberían existir pero no tienen contenido
+    y los regenera para completar el curso.
+    """
+    start_time = time.time()
+    course = None
+    
+    try:
+        logger.info(f"Iniciando regeneración de módulos faltantes para curso {course_id}")
+        
+        course = Course.objects.get(id=course_id)
+        
+        # Verificar que hay módulos que regenerar
+        missing_modules = []
+        for module_number in range(1, course.total_modules + 1):
+            existing_module = Module.objects.filter(course=course, module_order=module_number).first()
+            if not existing_module or existing_module.chunks.count() == 0:
+                missing_modules.append(module_number)
+        
+        if not missing_modules:
+            logger.info(f"No hay módulos faltantes en el curso {course_id}")
+            return "No hay módulos faltantes"
+        
+        logger.info(f"Módulos faltantes detectados: {missing_modules}")
+        
+        GenerationLog.objects.create(
+            course=course,
+            action=GenerationLog.ActionChoices.MODULE_GENERATION,
+            message=f"Iniciando regeneración de módulos faltantes: {missing_modules}"
+        )
+        
+        # Preparar metadata del curso
+        course_metadata = {
+            'title': course.title,
+            'description': course.description,
+            'level': course.user_level,
+            'module_list': course.module_list,
+            'topics': course.topics
+        }
+        
+        modules_regenerated = 0
+        
+        # Ejecutar generación asíncrona
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            # Obtener videos ya usados en el curso para evitar duplicados
+            used_video_ids = set()
+            for existing_mod in course.modules.all():
+                if existing_mod.video_data and 'video_id' in existing_mod.video_data:
+                    used_video_ids.add(existing_mod.video_data['video_id'])
+                # También obtener videos de chunks
+                for chunk in existing_mod.chunks.all():
+                    if hasattr(chunk, 'video') and chunk.video:
+                        used_video_ids.add(chunk.video.video_id)
+            
+            logger.info(f"Videos ya usados en el curso: {len(used_video_ids)}")
+            
+            # Regenerar cada módulo faltante
+            for module_number in missing_modules:
+                try:
+                    logger.info(f"Regenerando módulo {module_number}")
+                    
+                    module_data = loop.run_until_complete(
+                        anthropic_service.create_module_content(course_metadata, module_number)
+                    )
+                    
+                    # Buscar módulo existente o crear nuevo
+                    existing_module = Module.objects.filter(course=course, module_order=module_number).first()
+                    if existing_module:
+                        module = existing_module
+                        # Limpiar chunks existentes por si acaso
+                        module.chunks.all().delete()
+                        # Actualizar módulo existente
+                        module.title = module_data.get('title', module.title)
+                        module.description = module_data.get('description', module.description)
+                        module.objective = module_data.get('objective', module.objective)
+                        module.concepts = module_data.get('concepts', [])
+                        module.summary = module_data.get('summary', '')
+                        module.practical_exercise = module_data.get('practical_exercise', {})
+                        module.resources = module_data.get('resources', {})
+                        module.save()
+                    else:
+                        # Crear módulo nuevo
+                        module = Module.objects.create(
+                            course=course,
+                            module_id=module_data.get('module_id', f'modulo_{module_number}'),
+                            module_order=module_number,
+                            title=module_data.get('title', ''),
+                            description=module_data.get('description', ''),
+                            objective=module_data.get('objective', ''),
+                            concepts=module_data.get('concepts', []),
+                            summary=module_data.get('summary', ''),
+                            practical_exercise=module_data.get('practical_exercise', {}),
+                            resources=module_data.get('resources', {})
+                        )
+                    
+                    # Crear chunks y videos
+                    chunks_data = module_data.get('chunks', [])
+                    first_video_for_module = None
+                    
+                    for chunk_data in chunks_data:
+                        chunk = Chunk.objects.create(
+                            module=module,
+                            chunk_id=chunk_data.get('chunk_id', ''),
+                            chunk_order=chunk_data.get('chunk_order', 1),
+                            total_chunks=chunk_data.get('total_chunks', 6),
+                            content=chunk_data.get('content', ''),
+                            checksum=chunk_data.get('checksum', ''),
+                            title=chunk_data.get('title', '')
+                        )
+                        
+                        # Buscar videos únicos para chunks
+                        try:
+                            videos = loop.run_until_complete(
+                                youtube_service.search_videos_for_chunk(chunk_data, course_metadata)
+                            )
+                            
+                            # Filtrar videos ya usados y seleccionar uno único
+                            unique_video = None
+                            for video_candidate in videos:
+                                candidate_id = video_candidate.get('video_id', '')
+                                if candidate_id and candidate_id not in used_video_ids:
+                                    unique_video = video_candidate
+                                    used_video_ids.add(candidate_id)  # Agregar a usados
+                                    break
+                            
+                            if unique_video:
+                                Video.objects.create(
+                                    chunk=chunk,
+                                    video_id=unique_video.get('video_id', ''),
+                                    title=unique_video.get('title', ''),
+                                    url=unique_video.get('url', ''),
+                                    embed_url=unique_video.get('embed_url', ''),
+                                    thumbnail_url=unique_video.get('thumbnail_url', ''),
+                                    duration=unique_video.get('duration', 'N/A'),
+                                    view_count=unique_video.get('view_count', 0)
+                                )
+                                
+                                # Guardar el primer video único encontrado para el módulo
+                                if first_video_for_module is None:
+                                    first_video_for_module = unique_video
+                                    logger.info(f"Video único asignado al módulo {module_number}: {unique_video.get('title', 'Sin título')}")
+                            else:
+                                logger.warning(f"No se encontraron videos únicos para chunk {chunk.chunk_id}")
+                                
+                        except Exception as video_error:
+                            logger.warning(f"Error buscando video para chunk {chunk.chunk_id}: {video_error}")
+                    
+                    # Asignar el primer video único encontrado al campo video_data del módulo
+                    if first_video_for_module:
+                        module.video_data = first_video_for_module
+                        module.save()
+                        logger.info(f"Video principal único asignado al módulo {module_number}: {first_video_for_module.get('title', 'Sin título')}")
+                    else:
+                        logger.warning(f"No se pudo asignar video principal único al módulo {module_number}")
+                    
+                    # Crear quiz
+                    quiz_data = module_data.get('quiz', [])
+                    for question_data in quiz_data:
+                        Quiz.objects.create(
+                            module=module,
+                            question=question_data.get('question', ''),
+                            options=question_data.get('options', []),
+                            correct_answer=question_data.get('correct_answer', 0),
+                            explanation=question_data.get('explanation', '')
+                        )
+                    
+                    modules_regenerated += 1
+                    logger.info(f"Módulo {module_number} regenerado exitosamente")
+                    
+                except Exception as module_error:
+                    logger.error(f"Error regenerando módulo {module_number}: {module_error}")
+                    # Continuar con siguiente módulo
+            
+            # Actualizar status del curso si corresponde
+            if modules_regenerated > 0:
+                if course.status in [Course.StatusChoices.GENERATING_REMAINING, Course.StatusChoices.FAILED]:
+                    course.status = Course.StatusChoices.COMPLETE
+                    course.completed_at = timezone.now()
+                    course.save()
+            
+            duration = time.time() - start_time
+            GenerationLog.objects.create(
+                course=course,
+                action=GenerationLog.ActionChoices.COMPLETION,
+                message=f"Regeneración completada. {modules_regenerated} módulos regenerados",
+                duration_seconds=duration,
+                details={'modules_regenerated': modules_regenerated, 'missing_modules': missing_modules}
+            )
+            
+            logger.info(f"Regeneración de módulos completada para curso {course_id} en {duration:.2f}s")
+            return f"Regenerados {modules_regenerated} módulos: {missing_modules}"
+            
+        finally:
+            loop.close()
+            
+    except Exception as e:
+        logger.error(f"Error en regeneración de módulos para curso {course_id}: {e}")
+        
+        if course:
+            GenerationLog.objects.create(
+                course=course,
+                action=GenerationLog.ActionChoices.ERROR,
+                message=f"Error en regeneración de módulos: {str(e)}",
                 duration_seconds=time.time() - start_time
             )
         

@@ -1,20 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}Prompt2Course - Crea Cursos Inteligentes en Segundos{% endblock %}
+{% block title %}Crear Nuevo Curso - Cursia{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <!-- Hero Section -->
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold text-primary mb-3">
-                <i class="fas fa-magic me-3"></i>
-                Prompt2Course
-            </h1>
-            <p class="lead text-muted mb-4">
-                Genera cursos educativos completos y estructurados en menos de 10 segundos 
-                usando solo un prompt simple. IA + Audio + Video = Educación Inteligente.
-            </p>
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'users:dashboard' %}" style="color: var(--primary-color); text-decoration: none;">
+                    Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Crear Curso</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Hero Section -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold mb-3" style="color: var(--primary-color);">
+                    <i class="fas fa-magic me-3"></i>
+                    Crear Nuevo Curso
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Genera cursos educativos completos y estructurados en segundos 
+                    usando solo un prompt simple. IA + Audio + Video = Educación Inteligente.
+                </p>
             <div class="row text-center">
                 <div class="col-md-4">
                     <i class="fas fa-brain fa-2x text-primary mb-2"></i>
@@ -42,7 +55,8 @@
                     Crear Nuevo Curso
                 </h3>
                 
-                <form id="courseForm" hx-post="/demo-create-course/" hx-target="#result-area" hx-swap="innerHTML">
+                <form id="courseForm" action="{% url 'create_course' %}" method="post">
+                    {% csrf_token %}
                     <!-- Prompt del Usuario -->
                     <div class="mb-4">
                         <label for="user_prompt" class="form-label fw-bold">
@@ -137,12 +151,9 @@
 
                     <!-- Botón de Envío -->
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg px-5 py-2">
+                        <button type="submit" class="btn btn-primary btn-lg px-5 py-2" id="submitBtn">
                             <i class="fas fa-sparkles me-2"></i>
                             Generar Curso Inteligente
-                            <span class="htmx-indicator">
-                                <span class="spinner-border spinner-border-sm ms-2" role="status"></span>
-                            </span>
                         </button>
                     </div>
                 </form>
@@ -193,47 +204,67 @@
 <script>
     // Manejar formulario y intereses
     document.getElementById('courseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
+        
         // Recolectar intereses seleccionados
         const interests = [];
         document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(checkbox) {
             interests.push(checkbox.value);
         });
         
-        // Crear input hidden para intereses
-        const existingInterests = document.querySelector('input[name="user_interests"]');
-        if (existingInterests) {
-            existingInterests.remove();
-        }
+        // Prepare form data
+        const formData = new FormData(form);
+        formData.set('user_interests', JSON.stringify(interests));
         
-        const interestsInput = document.createElement('input');
-        interestsInput.type = 'hidden';
-        interestsInput.name = 'user_interests';
-        interestsInput.value = JSON.stringify(interests);
-        this.appendChild(interestsInput);
+        // Submit form
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            } else {
+                // Success! Show progress and start polling
+                const courseId = data.id;
+                showInitialProgress(courseId);
+                startPolling(courseId);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al crear el curso. Por favor intenta de nuevo.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
     });
 
-    // Manejar respuesta de creación de curso
-    document.addEventListener('htmx:afterRequest', function(event) {
-        if (event.detail.xhr.status === 201) {
-            const response = JSON.parse(event.detail.xhr.responseText);
-            const courseId = response.id;
-            
-            // Mostrar mensaje de éxito y empezar polling
-            document.getElementById('result-area').innerHTML = `
-                <div class="alert alert-success">
-                    <h5><i class="fas fa-check-circle me-2"></i>Curso Creado Exitosamente</h5>
-                    <p>Tu curso está siendo generado. ID: <code>${courseId}</code></p>
-                    <div class="progress mb-2">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 25%"></div>
-                    </div>
-                    <small>Generando metadata del curso...</small>
+    function showInitialProgress(courseId) {
+        document.getElementById('result-area').innerHTML = `
+            <div class="alert alert-success">
+                <h5><i class="fas fa-check-circle me-2"></i>Curso Creado Exitosamente</h5>
+                <p>Tu curso está siendo generado. ID: <code>${courseId}</code></p>
+                <div class="progress mb-2">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 25%"></div>
                 </div>
-            `;
-            
-            // Empezar polling del estado
-            startPolling(courseId);
-        }
-    });
+                <small>Generando metadata del curso...</small>
+            </div>
+        `;
+    }
 
     function startPolling(courseId) {
         const pollInterval = setInterval(function() {
@@ -265,7 +296,7 @@
                     clearInterval(pollInterval);
                     showError();
                 });
-        }, 5000); // Poll cada 5 segundos (reducido para evitar spam)
+        }, 5000); // Poll cada 5 segundos
     }
 
     function updateProgress(data) {
@@ -327,9 +358,9 @@
                     <a href="/course/${courseId}/" class="btn btn-primary">
                         <i class="fas fa-play me-2"></i>Ver Curso
                     </a>
-                    <button class="btn btn-outline-primary" onclick="copyToClipboard('${window.location.origin}/course/${courseId}/')">
-                        <i class="fas fa-copy me-2"></i>Copiar Enlace
-                    </button>
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                    </a>
                 </div>
             </div>
         `;

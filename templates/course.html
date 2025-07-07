@@ -68,9 +68,9 @@
                         Reproducir Podcast
                     </button>
                     {% endif %}
-                    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-home me-2"></i>
-                        Inicio
+                        Dashboard
                     </a>
                 </div>
             </div>
@@ -479,9 +479,9 @@
                 {% endif %}
                 
                 <div class="mt-4">
-                    <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-2"></i>
-                        Crear Otro Curso
+                        Volver al Dashboard
                     </a>
                 </div>
             </div>

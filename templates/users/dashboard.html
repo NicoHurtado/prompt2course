@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Cursia{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h1 class="fw-bold mb-2">
+                        ¡Hola, {{ user.first_name|default:user.username }}! 👋
+                    </h1>
+                    <p class="text-muted mb-0">Bienvenido a tu dashboard de Cursia</p>
+                </div>
+                <div>
+                    {% if can_create_more %}
+                        <a href="{% url 'new_course' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Crear Nuevo Curso
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary" disabled title="Límite de cursos alcanzado para tu plan">
+                            <i class="fas fa-lock me-2"></i>
+                            Límite Alcanzado
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ stats.total_courses }}</div>
+                <div class="stats-label">Total de Cursos</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ stats.completed_courses }}</div>
+                <div class="stats-label">Completados</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ stats.in_progress_courses }}</div>
+                <div class="stats-label">En Progreso</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ stats.generating_courses }}</div>
+                <div class="stats-label">Generando</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Section -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="fw-bold mb-4">Mis Cursos</h3>
+            
+            {% if courses %}
+                <div class="row">
+                    {% for course in courses %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="course-card card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="card-title fw-bold">
+                                            {% if course.title %}
+                                                {{ course.title|truncatechars:50 }}
+                                            {% else %}
+                                                Curso en generación...
+                                            {% endif %}
+                                        </h5>
+                                        
+                                        <!-- Status Badge -->
+                                        {% if course.status == 'generating_metadata' or course.status == 'generating_modules_metadata' or course.status == 'generating_module_1' %}
+                                            <span class="status-badge badge-generating">
+                                                <i class="fas fa-spinner fa-spin me-1"></i>
+                                                Generando
+                                            </span>
+                                        {% elif course.status == 'ready' or course.status == 'generating_remaining' %}
+                                            <span class="status-badge badge-ready">
+                                                <i class="fas fa-play me-1"></i>
+                                                Listo
+                                            </span>
+                                        {% elif course.status == 'complete' %}
+                                            <span class="status-badge badge-complete">
+                                                <i class="fas fa-check me-1"></i>
+                                                Completo
+                                            </span>
+                                        {% elif course.status == 'failed' %}
+                                            <span class="status-badge badge-failed">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                Error
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge badge-generating">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Procesando
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <p class="text-muted mb-3">
+                                        {% if course.description %}
+                                            {{ course.description|truncatechars:120 }}
+                                        {% else %}
+                                            {{ course.user_prompt|truncatechars:120 }}
+                                        {% endif %}
+                                    </p>
+
+                                    <!-- Progress Bar -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">Progreso</small>
+                                            <small class="text-muted">{{ course.get_progress_percentage }}%</small>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ course.get_progress_percentage }}%"
+                                                 aria-valuenow="{{ course.get_progress_percentage }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Course Info -->
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Nivel</small>
+                                            <span class="badge bg-light text-dark">
+                                                {{ course.get_user_level_display }}
+                                            </span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Módulos</small>
+                                            <span class="badge bg-light text-dark">
+                                                {{ course.total_modules }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2">
+                                        {% if course.status == 'ready' or course.status == 'generating_remaining' or course.status == 'complete' %}
+                                            <a href="{% url 'course_view' course.id %}" class="btn btn-primary btn-sm flex-fill">
+                                                <i class="fas fa-eye me-1"></i>
+                                                Ver Curso
+                                            </a>
+                                        {% elif course.status == 'metadata_ready' %}
+                                            <a href="{% url 'course_metadata' course.id %}" class="btn btn-outline-primary btn-sm flex-fill">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Ver Info
+                                            </a>
+                                        {% else %}
+                                            <button class="btn btn-outline-secondary btn-sm flex-fill" disabled>
+                                                <i class="fas fa-hourglass-half me-1"></i>
+                                                Generando...
+                                            </button>
+                                        {% endif %}
+                                        
+                                        <button class="btn btn-outline-danger btn-sm" 
+                                                onclick="confirmDelete('{{ course.id }}', '{{ course.title|default:"este curso" }}')"
+                                                title="Eliminar curso">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Created Date -->
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Creado el {{ course.created_at|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-graduation-cap" style="font-size: 4rem; color: var(--primary-color); opacity: 0.5;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">¡Crea tu primer curso!</h4>
+                    <p class="text-muted mb-4">
+                        Aún no tienes cursos creados. Utiliza nuestra IA para generar 
+                        contenido educativo de calidad en minutos.
+                    </p>
+                    {% if can_create_more %}
+                        <a href="{% url 'new_course' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>
+                            Crear Mi Primer Curso
+                        </a>
+                    {% else %}
+                        <p class="text-warning">
+                            <i class="fas fa-lock me-1"></i>
+                            Has alcanzado el límite de cursos para tu plan {{ user.get_membership_display }}.
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Confirm delete function
+    function confirmDelete(courseId, courseTitle) {
+        if (confirm(`¿Estás seguro de que quieres eliminar "${courseTitle}"? Esta acción no se puede deshacer.`)) {
+            // Here you would implement the delete functionality
+            alert('Funcionalidad de eliminación por implementar');
+        }
+    }
+    
+    // Auto-refresh for courses that are generating
+    const hasGeneratingCourses = {{ stats.generating_courses }} > 0;
+    if (hasGeneratingCourses) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000); // Refresh every 30 seconds
+    }
+</script>
+{% endblock %} 

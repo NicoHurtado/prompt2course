@@ -1,7 +1,7 @@
 import uuid
 import json
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
@@ -27,6 +27,9 @@ class Course(models.Model):
     # Identificadores únicos
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course_id = models.CharField(max_length=100, unique=True, blank=True)
+    
+    # Usuario propietario del curso
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='courses')
     
     # Información del usuario y generación
     user_prompt = models.TextField(verbose_name="Prompt del usuario")
@@ -236,7 +239,7 @@ class UserProgress(models.Model):
     """Progreso del usuario en un curso"""
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     
     # Progreso
