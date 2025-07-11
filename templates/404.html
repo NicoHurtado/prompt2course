@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}404 - Página no encontrada | Cursia{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center fade-in">
+    <div class="container py-5">
+        <div class="mb-4">
+            <i class="fas fa-graduation-cap fa-4x" style="color: var(--primary-color);"></i>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">¡Ups! Página no encontrada</h1>
+        <p class="lead mb-4">Lo sentimos, la página que buscas no existe o ha sido movida.
+            ¡Sigamos aprendiendo!</p>
+        <a href="{% url 'users:dashboard' %}" class="btn btn-primary btn-lg px-4 me-2">
+            <i class="fas fa-home me-2"></i>Ir al Dashboard
+        </a>
+        <a href="{% url 'new_course' %}" class="btn btn-outline-primary btn-lg px-4">
+            <i class="fas fa-magic me-2"></i>Crear un Curso
+        </a>
+    </div>
+</section>
+{% endblock %} 
