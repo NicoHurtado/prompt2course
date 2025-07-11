@@ -1,0 +1,12 @@
+{% comment %}Reusable breadcrumb component. Expect 'breadcrumbs' list of dicts with 'url' and 'label'. Last element can have url '' or None.{% endcomment %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        {% for crumb in breadcrumbs %}
+            {% if forloop.last or not crumb.url %}
+                <li class="breadcrumb-item active" aria-current="page">{{ crumb.label }}</li>
+            {% else %}
+                <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.label }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav> 

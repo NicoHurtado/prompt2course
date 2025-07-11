@@ -2,19 +2,20 @@
 
 {% block title %}Crear Nuevo Curso - Cursia{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <!-- Breadcrumb -->
+{% block breadcrumb %}
+<div class="container mt-3">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{% url 'users:dashboard' %}" style="color: var(--primary-color); text-decoration: none;">
-                    Dashboard
-                </a>
-            </li>
+            <li class="breadcrumb-item"><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
             <li class="breadcrumb-item active" aria-current="page">Crear Curso</li>
         </ol>
     </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb eliminado aquí para evitar duplicado -->
 
     <div class="row">
         <div class="col-lg-8 mx-auto">
@@ -202,56 +203,67 @@
 
 {% block extra_js %}
 <script>
-    // Manejar formulario y intereses
-    document.getElementById('courseForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const form = this;
-        const submitBtn = document.getElementById('submitBtn');
-        const originalText = submitBtn.innerHTML;
-        
-        // Disable button and show loading
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
-        
-        // Recolectar intereses seleccionados
-        const interests = [];
-        document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(checkbox) {
-            interests.push(checkbox.value);
-        });
-        
-        // Prepare form data
-        const formData = new FormData(form);
-        formData.set('user_interests', JSON.stringify(interests));
-        
-        // Submit form
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
+    // Variable global para intereses seleccionados (debe estar antes de usarla)
+    var selectedInterests = [];
+
+    // Piscina de quotes / micro-tips categorizados
+    const quotesPool = {
+        'Tecnología': [
+            "La tecnología está hecha para amplificar la imaginación humana.",
+            "Cada línea de código es un paso hacia el futuro."
+        ],
+        'Deportes': [
+            "La constancia vence al talento cuando el talento no se esfuerza.",
+            "El sudor de hoy es el éxito de mañana."
+        ],
+        'Negocios': [
+            "Las grandes ideas nacen de grandes retos.",
+            "Emprender es convertir problemas en oportunidades."
+        ],
+        'Arte': [
+            "La creatividad es la inteligencia divirtiéndose.",
+            "El arte lava del alma el polvo de la rutina."
+        ],
+        'Ciencia': [
+            "La ciencia no es solo un conjunto de conocimientos, es una manera de pensar.",
+            "Preguntar es la semilla de todo descubrimiento."
+        ],
+        'Salud': [
+            "Tu cuerpo escucha todo lo que dice tu mente.",
+            "La salud es la riqueza real y no piezas de oro y plata."
+        ],
+        'Educación': [
+            "Aprender nunca agota la mente.",
+            "La educación es el arma más poderosa para cambiar el mundo."
+        ],
+        'Marketing': [
+            "Convierte a los extraños en amigos y a los amigos en clientes.",
+            "El buen marketing hace que la empresa parezca inteligente."
+        ],
+        'default': [
+            "Cada segundo cuenta, ¡sigue avanzando!",
+            "El conocimiento es un viaje, no un destino."
+        ]
+    };
+
+    // Variables globales para controlar la carga
+    let pollInterval = null;
+    let timeoutTimer = null;
+    let courseFinished = false;
+
+    // Devuelve una quote aleatoria basada en los intereses seleccionados
+    function getRandomQuote() {
+        let pool = [];
+        selectedInterests.forEach(int => {
+            if (quotesPool[int]) {
+                pool = pool.concat(quotesPool[int]);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Error: ' + data.error);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            } else {
-                // Success! Show progress and start polling
-                const courseId = data.id;
-                showInitialProgress(courseId);
-                startPolling(courseId);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al crear el curso. Por favor intenta de nuevo.');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
         });
-    });
+        if (pool.length === 0) {
+            pool = quotesPool['default'];
+        }
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
 
     function showInitialProgress(courseId) {
         document.getElementById('result-area').innerHTML = `
@@ -262,55 +274,78 @@
                     <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 25%"></div>
                 </div>
                 <small>Generando metadata del curso...</small>
+                <div class="mt-3 fst-italic text-secondary">"${getRandomQuote()}"</div>
             </div>
         `;
     }
 
     function startPolling(courseId) {
-        const pollInterval = setInterval(function() {
+        // Reiniciar timers si fuese necesario
+        if (pollInterval) clearInterval(pollInterval);
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        courseFinished = false;
+
+        pollInterval = setInterval(function() {
             fetch(`/course/${courseId}/status/`)
                 .then(response => response.json())
                 .then(data => {
                     updateProgress(data);
-                    
+
                     // Manejar errores
                     if (data.status === 'failed') {
                         clearInterval(pollInterval);
+                        clearTimeout(timeoutTimer);
                         showError();
                         return;
                     }
-                    
-                    // Permitir acceso desde metadata_ready en adelante (incluso durante generación)
-                    if (data.status === 'metadata_ready' || data.status === 'generating_module_1' || 
-                        data.status === 'ready' || data.status === 'generating_remaining' || data.status === 'complete') {
+
+                    // Mostrar disponibilidad temprana y, si está completo, detener timers
+                    if ([
+                        'metadata_ready',
+                        'generating_module_1',
+                        'ready',
+                        'generating_remaining',
+                        'complete'
+                    ].includes(data.status)) {
                         showCourseReady(courseId, data);
-                        
-                        // Solo parar polling cuando esté complete
+
                         if (data.status === 'complete') {
+                            courseFinished = true;
                             clearInterval(pollInterval);
+                            clearTimeout(timeoutTimer);
                         }
                     }
                 })
                 .catch(error => {
                     console.error('Error polling course status:', error);
                     clearInterval(pollInterval);
+                    clearTimeout(timeoutTimer);
                     showError();
                 });
         }, 5000); // Poll cada 5 segundos
+
+        // Timeout de 40s para evitar espera indefinida
+        timeoutTimer = setTimeout(function() {
+            if (!courseFinished) {
+                clearInterval(pollInterval);
+                showTimeoutError();
+            }
+        }, 40000);
     }
 
     function updateProgress(data) {
         let progressPercent = data.progress_percentage || 0;
         let statusText = getStatusText(data.status);
-        
+
         document.getElementById('result-area').innerHTML = `
             <div class="alert alert-info">
                 <h5><i class="fas fa-cog fa-spin me-2"></i>Generando Curso</h5>
-                <p>Estado: <strong>${statusText}</strong></p>
+                <p class="mb-1">Estado: <strong>${statusText}</strong></p>
                 <div class="progress mb-2">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${progressPercent}%"></div>
                 </div>
-                <small>${progressPercent}% completado</small>
+                <small class="d-block mb-2">${progressPercent}% completado</small>
+                <em class="text-secondary">"${getRandomQuote()}"</em>
             </div>
         `;
     }
@@ -377,5 +412,68 @@
             </div>
         `;
     }
+
+    function showTimeoutError() {
+        document.getElementById('result-area').innerHTML = `
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-hourglass-half me-2"></i>Esto está tardando más de lo esperado</h5>
+                <p>Puede que algo haya fallado durante la generación. ¡No te preocupes! Puedes reintentar usando tu mismo prompt sin perder nada.</p>
+                <button class="btn btn-primary me-2" onclick="location.reload()">
+                    <i class="fas fa-redo me-1"></i>Reintentar
+                </button>
+            </div>
+        `;
+    }
+
+    // Manejar formulario y enviar datos al backend
+    document.getElementById('courseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = this;
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+
+        // Deshabilitar botón y mostrar spinner
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
+
+        // Recolectar intereses seleccionados
+        const interests = [];
+        document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(checkbox) {
+            interests.push(checkbox.value);
+        });
+        selectedInterests = interests; // Guardamos intereses para las quotes
+
+        // Preparar datos de formulario
+        const formData = new FormData(form);
+        formData.set('user_interests', JSON.stringify(interests));
+
+        // Enviar solicitud
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            } else {
+                const courseId = data.id;
+                showInitialProgress(courseId);
+                startPolling(courseId);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al crear el curso. Por favor intenta de nuevo.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    });
 </script>
 {% endblock %} 

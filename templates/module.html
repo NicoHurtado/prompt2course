@@ -4,6 +4,18 @@
 
 {% block title %}{{ module.title }} - {{ course.title }}{% endblock %}
 
+{% block breadcrumb %}
+<div class="container mt-3">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'course_view' course.id %}">{{ course.title|truncatechars:30 }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Módulo {{ module.module_order }}</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <!-- Module Sidebar -->
