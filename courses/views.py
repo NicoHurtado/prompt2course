@@ -12,12 +12,9 @@ from generation.tasks import generate_course_metadata, generate_remaining_module
 @login_required
 def index(request):
     """Vista principal para crear cursos"""
-    # Verificar si el usuario puede crear más cursos
-    if not request.user.can_create_course():
-        return redirect('users:dashboard')
-    
+    # Permitir siempre crear cursos
     context = {
-        'can_create_more': request.user.can_create_course(),
+        'can_create_more': True,
     }
     return render(request, 'index.html', context)
 
@@ -28,28 +25,20 @@ def index(request):
 def simple_course_create(request):
     """Vista para crear cursos reales usando la API de Claude"""
     try:
-        # Verificar si el usuario puede crear más cursos
-        if not request.user.can_create_course():
-            return JsonResponse({
-                'error': f'Has alcanzado el límite de cursos para tu membresía {request.user.get_membership_display()}. Actualiza tu plan para crear más cursos.'
-            }, status=403)
-        
+        # Permitir siempre crear cursos
         # Obtener datos del formulario
         user_prompt = request.POST.get('user_prompt', '').strip()
         user_level = request.POST.get('user_level', 'principiante')
         user_interests_json = request.POST.get('user_interests', '[]')
-        
         # Validar datos requeridos
         if not user_prompt:
             return JsonResponse({
                 'error': 'El prompt es requerido'
             }, status=400)
-            
         if len(user_prompt) < 10:
             return JsonResponse({
                 'error': 'El prompt debe tener al menos 10 caracteres'
             }, status=400)
-        
         # Parsear intereses
         try:
             user_interests = json.loads(user_interests_json)
@@ -57,7 +46,6 @@ def simple_course_create(request):
                 user_interests = []
         except (json.JSONDecodeError, TypeError):
             user_interests = []
-        
         # Crear curso con status inicial
         course = Course.objects.create(
             user=request.user,
@@ -67,10 +55,8 @@ def simple_course_create(request):
             status=Course.StatusChoices.GENERATING_METADATA,
             language='es'  # Por defecto español
         )
-        
         # Iniciar tarea asíncrona de generación de metadata (Fase 1)
         generate_course_metadata.delay(str(course.id))
-        
         # Respuesta inmediata con datos básicos
         return JsonResponse({
             'id': str(course.id),
@@ -78,7 +64,6 @@ def simple_course_create(request):
             'title': course.title or None,
             'message': 'Curso creado exitosamente. Generando metadata con IA...'
         }, status=201)
-            
     except Exception as e:
         return JsonResponse({
             'error': f'Error interno del servidor: {str(e)}'
@@ -233,5 +218,14 @@ def regenerate_course_modules(request, course_id):
             'error': True,
             'message': f'Error al iniciar regeneración: {str(e)}'
         }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_course(request, course_id):
+    """Permite al usuario autenticado eliminar un curso de forma segura."""
+    course = get_object_or_404(Course, id=course_id, user=request.user)
+    course.delete()
+    return JsonResponse({"deleted": True})
 
 

@@ -56,11 +56,11 @@
                 <h6 class="text-muted mb-3">Acciones Rápidas</h6>
                 <div class="d-grid gap-2">
                     {% if user_progress.current_module %}
-                                             <a href="{% url 'module_view' course_id=course.id module_id=user_progress.current_module.module_id %}" 
-                       class="btn btn-primary btn-sm">
-                        <i class="fas fa-play me-2"></i>
-                        Continuar
-                    </a>
+                        <a href="{% url 'module_view' course_id=course.id module_id=user_progress.current_module.module_id %}" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-play me-2"></i>
+                            Continuar
+                        </a>
                     {% endif %}
                     {% if course.podcast_audio_url %}
                     <button class="btn btn-outline-primary btn-sm" onclick="openPodcastPlayer()">
@@ -72,6 +72,18 @@
                         <i class="fas fa-home me-2"></i>
                         Dashboard
                     </a>
+                </div>
+            </div>
+        </div>
+        <!-- User Prompt -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Prompt original del usuario
+                </h6>
+                <div class="alert alert-secondary mb-0" style="white-space: pre-wrap;">
+                    {{ course.user_prompt }}
                 </div>
             </div>
         </div>
@@ -114,7 +126,7 @@
             </div>
             <div class="card-body">
                 <div class="chunk-content mb-4">
-                    {{ course.introduction|markdownify }}
+                    {{ course.introduction|markdown }}
                 </div>
                 
                 <!-- Botón Reproduce Intro -->

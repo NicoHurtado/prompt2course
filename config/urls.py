@@ -41,6 +41,7 @@ urlpatterns = [
     path('new-course/', course_views.index, name='new_course'),
     
     # Course management
+    path('course/<uuid:course_id>/delete/', course_views.delete_course, name='delete_course'),
     path('course/<uuid:course_id>/regenerate/', course_views.regenerate_course_modules, name='regenerate_course_modules'),
 ]
 

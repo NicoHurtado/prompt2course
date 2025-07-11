@@ -116,8 +116,8 @@ def dashboard_view(request):
     }
     
     # Verificar si puede crear más cursos
-    can_create_more = user.can_create_course()
-    
+    can_create_more = True
+
     context = {
         'user': user,
         'courses': courses,

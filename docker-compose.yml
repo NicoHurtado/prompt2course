@@ -6,7 +6,10 @@ services:
     container_name: p2c_web
     command: ["/entrypoint.sh"]
     volumes:
-      - .:/app
+      - ./logs:/app/logs
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./db.sqlite3:/app/db.sqlite3
     ports:
       - "8000:8000"
     environment:
@@ -27,7 +30,9 @@ services:
     container_name: p2c_celery
     entrypoint: ["/app/celery-entrypoint.sh"]
     volumes:
-      - .:/app
+      - ./logs:/app/logs
+      - ./media:/app/media
+      - ./db.sqlite3:/app/db.sqlite3
     environment:
       - DEBUG=True
       - CELERY_BROKER_URL=redis://redis:6379/0

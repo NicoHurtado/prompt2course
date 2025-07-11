@@ -175,7 +175,7 @@
                     <div class="card-body">
                         <!-- Chunk Content -->
                         <div class="chunk-content markdown-body mb-4">
-                            {{ chunk.content|markdownify }}
+                            {{ chunk.content|markdown }}
                         </div>
                     </div>
                 </div>
@@ -294,7 +294,7 @@
             </div>
             <div class="card-body">
                 <div class="chunk-content markdown-body">
-                    {{ module.summary|markdownify }}
+                    {{ module.summary|markdown }}
                 </div>
             </div>
         </div>

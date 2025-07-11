@@ -37,10 +37,5 @@ class User(AbstractUser):
         return self.courses.count()
     
     def can_create_course(self):
-        """Verifica si el usuario puede crear más cursos según su membresía"""
-        if self.membership == self.MembershipChoices.FREE:
-            return self.get_course_count() < 3  # Límite de 3 cursos para usuarios free
-        elif self.membership == self.MembershipChoices.PREMIUM:
-            return self.get_course_count() < 50  # Límite de 50 cursos para premium
-        else:  # ENTERPRISE
-            return True  # Sin límite para enterprise 
+        """Permitir crear cursos sin límite temporalmente"""
+        return True 

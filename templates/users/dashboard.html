@@ -217,12 +217,97 @@
 
 {% block extra_js %}
 <script>
-    // Confirm delete function
-    function confirmDelete(courseId, courseTitle) {
-        if (confirm(`¿Estás seguro de que quieres eliminar "${courseTitle}"? Esta acción no se puede deshacer.`)) {
-            // Here you would implement the delete functionality
-            alert('Funcionalidad de eliminación por implementar');
+    /* --- Helper para obtener la cookie CSRF (recomendado por la documentación de Django) --- */
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
+        return cookieValue;
+    }
+
+    /* --- Crear dinámicamente un modal Bootstrap para confirmar la eliminación --- */
+    function ensureDeleteModal() {
+        if (document.getElementById('deleteCourseModal')) {
+            return; // Ya existe
+        }
+        const modalHTML = `
+            <div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Eliminar Curso</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>¿Seguro que deseas eliminar "<strong id="deleteCourseTitle"></strong>"? Esta acción es permanente.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // Mostrar modal y manejar confirmación
+    function confirmDelete(courseId, courseTitle) {
+        ensureDeleteModal();
+
+        // Actualizar texto del modal
+        document.getElementById('deleteCourseTitle').textContent = courseTitle;
+
+        // Mostrar modal
+        const modalElement = document.getElementById('deleteCourseModal');
+        const bootstrapModal = new bootstrap.Modal(modalElement);
+        bootstrapModal.show();
+
+        // Configurar botón de confirmación
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+        // Eliminar event listener previo, si existe
+        confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+        const newConfirmBtn = document.getElementById('confirmDeleteBtn');
+
+        newConfirmBtn.addEventListener('click', () => {
+            newConfirmBtn.disabled = true;
+            newConfirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Eliminando...';
+
+            fetch(`/course/${courseId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al eliminar el curso');
+                }
+                return response.json();
+            })
+            .then(data => {
+                bootstrapModal.hide();
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error(error);
+                newConfirmBtn.disabled = false;
+                newConfirmBtn.innerHTML = '<i class="fas fa-trash me-1"></i>Eliminar';
+                alert('Ocurrió un error al eliminar el curso. Intenta nuevamente.');
+            });
+        });
     }
     
     // Auto-refresh for courses that are generating

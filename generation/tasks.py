@@ -13,6 +13,41 @@ from .services.youtube_service import youtube_service
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# EmojiLogFilter: añade emojis según el contenido del mensaje para identificar
+# rápidamente el estado en la consola (✅, 🚀, ⚙️, 🎬, ❌, ℹ️)
+# ---------------------------------------------------------------------------
+
+
+class EmojiLogFilter(logging.Filter):
+    """Filtro de logging que antepone un emoji basado en palabras clave."""
+
+    def filter(self, record: logging.LogRecord) -> bool:  # noqa: D401
+        msg = record.getMessage()
+
+        # Determinar emoji por palabras clave
+        if any(keyword in msg.lower() for keyword in ["error", "failed", "falla"]):
+            emoji = "❌"
+        elif "video" in msg.lower():
+            emoji = "🎬"
+        elif any(keyword in msg.lower() for keyword in ["generando", "iniciando", "activando"]):
+            emoji = "🚀"
+        elif any(keyword in msg.lower() for keyword in ["exitosamente", "generada", "generado"]):
+            emoji = "✅"
+        else:
+            emoji = "ℹ️"
+
+        # Anteponer emoji si no existe ya
+        if not msg.strip().startswith(emoji):
+            record.msg = f"{emoji} {msg}"
+
+        return True
+
+
+# Adjuntar filtro una sola vez para evitar duplicados si el módulo se recarga
+if not any(isinstance(f, EmojiLogFilter) for f in logger.filters):
+    logger.addFilter(EmojiLogFilter())
+
 
 @shared_task(bind=True)
 def generate_course_metadata(self, course_id: str):

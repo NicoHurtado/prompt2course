@@ -35,6 +35,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'corsheaders',
     'debug_toolbar',
+    # 'django_markdownify',
 ]
 
 LOCAL_APPS = [
@@ -207,7 +208,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'verbose',
