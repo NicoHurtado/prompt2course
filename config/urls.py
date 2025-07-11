@@ -55,3 +55,6 @@ if settings.DEBUG:
         urlpatterns = [
             path('__debug__/', include('debug_toolbar.urls')),
         ] + urlpatterns
+
+# Custom error handlers
+handler404 = 'config.views.custom_404'
