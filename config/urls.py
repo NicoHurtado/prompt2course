@@ -39,6 +39,7 @@ urlpatterns = [
     # Course creation
     path('create-course/', course_views.simple_course_create, name='create_course'),
     path('new-course/', course_views.index, name='new_course'),
+    path('create-course-from-home/', course_views.create_course_from_home, name='create_course_from_home'),
     
     # Course management
     path('course/<uuid:course_id>/delete/', course_views.delete_course, name='delete_course'),

@@ -1,197 +1,77 @@
 {% extends 'base.html' %}
 
-{% block title %}Crear Nuevo Curso - Cursia{% endblock %}
+{% block title %}Cursia - Plataforma de Aprendizaje Inteligente{% endblock %}
 
-{% block breadcrumb %}
-<div class="container mt-3">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Crear Curso</li>
-        </ol>
-    </nav>
-</div>
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Breadcrumb eliminado aquí para evitar duplicado -->
-
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <!-- Hero Section -->
-            <div class="text-center mb-5">
-                <h1 class="display-4 fw-bold mb-3" style="color: var(--primary-color);">
-                    <i class="fas fa-magic me-3"></i>
-                    Crear Nuevo Curso
+<!-- Hero Section con diseño moderno -->
+<div class="hero-section-modern">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <h1 class="hero-title">
+                    Aprende con <span class="text-gradient">Inteligencia Artificial</span>
                 </h1>
-                <p class="lead text-muted mb-4">
-                    Genera cursos educativos completos y estructurados en segundos 
-                    usando solo un prompt simple. IA + Audio + Video = Educación Inteligente.
+                <p class="hero-subtitle">
+                    Genera contenido educativo personalizado en segundos. 
+                    Claude AI crea cursos adaptados a tu nivel y estilo de aprendizaje.
                 </p>
-            <div class="row text-center">
-                <div class="col-md-4">
-                    <i class="fas fa-brain fa-2x text-primary mb-2"></i>
-                    <h6>Claude AI</h6>
-                    <small class="text-muted">Contenido inteligente</small>
-                </div>
-                <div class="col-md-4">
-                    <i class="fas fa-volume-up fa-2x text-success mb-2"></i>
-                    <h6>AWS Polly</h6>
-                    <small class="text-muted">Síntesis de voz neural</small>
-                </div>
-                <div class="col-md-4">
-                    <i class="fab fa-youtube fa-2x text-danger mb-2"></i>
-                    <h6>YouTube API</h6>
-                    <small class="text-muted">Videos educativos</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulario de Creación -->
-        <div class="card course-card mb-4">
-            <div class="card-body p-4">
-                <h3 class="card-title text-center mb-4">
-                    <i class="fas fa-rocket me-2"></i>
-                    Crear Nuevo Curso
-                </h3>
                 
-                <form id="courseForm" action="{% url 'create_course' %}" method="post">
-                    {% csrf_token %}
-                    <!-- Prompt del Usuario -->
-                    <div class="mb-4">
-                        <label for="user_prompt" class="form-label fw-bold">
-                            <i class="fas fa-lightbulb me-1"></i>
-                            ¿Qué quieres aprender?
-                        </label>
-                        <textarea 
-                            class="form-control" 
-                            id="user_prompt" 
-                            name="user_prompt" 
-                            rows="3" 
-                            placeholder="Ejemplo: quiero aprender Machine Learning para analizar datos deportivos"
-                            required
-                            minlength="10"
-                        ></textarea>
-                        <div class="form-text">
-                            Describe específicamente qué quieres aprender. Mínimo 10 caracteres.
-                        </div>
-                    </div>
-
-                    <!-- Nivel de Experiencia -->
-                    <div class="mb-4">
-                        <label for="user_level" class="form-label fw-bold">
-                            <i class="fas fa-chart-line me-1"></i>
-                            Nivel de Experiencia
-                        </label>
-                        <select class="form-select" id="user_level" name="user_level" required>
-                            <option value="">Selecciona tu nivel</option>
-                            <option value="principiante">
-                                <i class="fas fa-seedling"></i>
-                                Principiante - Empezando desde cero
-                            </option>
-                            <option value="intermedio">
-                                <i class="fas fa-tree"></i>
-                                Intermedio - Tengo conocimientos básicos
-                            </option>
-                            <option value="avanzado">
-                                <i class="fas fa-mountain"></i>
-                                Avanzado - Quiero profundizar mis conocimientos
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Intereses (Tags) -->
-                    <div class="mb-4">
-                        <label for="interests" class="form-label fw-bold">
-                            <i class="fas fa-tags me-1"></i>
-                            Tus Intereses (Opcional)
-                        </label>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Tecnología" id="tech">
-                                    <label class="form-check-label" for="tech">Tecnología</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Deportes" id="sports">
-                                    <label class="form-check-label" for="sports">Deportes</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Negocios" id="business">
-                                    <label class="form-check-label" for="business">Negocios</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Arte" id="art">
-                                    <label class="form-check-label" for="art">Arte y Diseño</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Ciencia" id="science">
-                                    <label class="form-check-label" for="science">Ciencia</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Salud" id="health">
-                                    <label class="form-check-label" for="health">Salud</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Educación" id="education">
-                                    <label class="form-check-label" for="education">Educación</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Marketing" id="marketing">
-                                    <label class="form-check-label" for="marketing">Marketing</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-text">
-                            Selecciona tus áreas de interés para personalizar el contenido.
-                        </div>
-                    </div>
-
-                    <!-- Botón de Envío -->
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg px-5 py-2" id="submitBtn">
-                            <i class="fas fa-sparkles me-2"></i>
-                            Generar Curso Inteligente
+                <!-- Buscador inteligente -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="topicSearch" class="search-input" placeholder="¿Qué quieres aprender hoy?" autocomplete="off">
+                        <button class="search-btn" onclick="startCourseCreation()">
+                            <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
-                </form>
+                </div>
+                
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <i class="fas fa-brain"></i>
+                        <span>Claude 3.5 Sonnet</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-headphones"></i>
+                        <span>Podcast Personalizado</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Diplomas</span>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- Área de Resultados -->
-        <div id="result-area">
-            <!-- Aquí se mostrará el progreso y resultado del curso -->
-        </div>
-
-        <!-- Ejemplos de Uso -->
-        <div class="card course-card">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-lightbulb me-2"></i>
-                    Ejemplos de Prompts Exitosos
-                </h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded mb-3">
-                            <strong>Tecnología:</strong><br>
-                            <em>"Quiero aprender desarrollo web con React para crear aplicaciones modernas"</em>
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="floating-card card-1">
+                        <div class="card-icon">
+                            <i class="fas fa-code"></i>
                         </div>
-                        <div class="p-3 bg-light rounded mb-3">
-                            <strong>Deportes:</strong><br>
-                            <em>"Necesito entender análisis de datos deportivos para mejorar rendimiento"</em>
+                        <div class="card-content">
+                            <h6>Machine Learning</h6>
+                            <p>Fundamentos y aplicaciones prácticas</p>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded mb-3">
-                            <strong>Negocios:</strong><br>
-                            <em>"Quiero aprender marketing digital para hacer crecer mi empresa"</em>
+                    <div class="floating-card card-2">
+                        <div class="card-icon">
+                            <i class="fas fa-palette"></i>
                         </div>
-                        <div class="p-3 bg-light rounded mb-3">
-                            <strong>Arte:</strong><br>
-                            <em>"Necesito dominar diseño gráfico con herramientas profesionales"</em>
+                        <div class="card-content">
+                            <h6>Diseño UX/UI</h6>
+                            <p>Principios y herramientas modernas</p>
+                        </div>
+                    </div>
+                    <div class="floating-card card-3">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Análisis de Datos</h6>
+                            <p>Python, SQL y visualización</p>
                         </div>
                     </div>
                 </div>
@@ -199,281 +79,1170 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<!-- Features Section -->
+<div class="features-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">¿Por qué elegir Cursia?</h2>
+            <p class="section-subtitle">La plataforma más avanzada para aprendizaje personalizado</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4>Cursos en segundos</h4>
+                    <p>Genera contenido educativo completo en cuestión de segundos. Lo que antes tomaba semanas, ahora lo tienes en minutos.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <h4>100% Personalizado</h4>
+                    <p>Basado en tus gustos, nivel de experiencia e intereses. Cada curso se adapta perfectamente a tu estilo de aprendizaje.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h4>Múltiples formas de aprender</h4>
+                    <p>Visual, auditivo, lectura. Contenido adaptado a tu preferencia de aprendizaje con videos, podcasts y textos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Section -->
+<div class="reviews-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Lo que dicen nuestros usuarios</h2>
+            <p class="section-subtitle">Miles de estudiantes ya están aprendiendo con Cursia</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="review-card">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="review-text">"Cursia revolucionó mi forma de aprender. En 5 minutos tenía un curso completo de Python adaptado a mi nivel."</p>
+                    <div class="review-author">
+                        <strong>María González</strong>
+                        <span>Desarrolladora Frontend</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="review-card">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="review-text">"El contenido es increíblemente personalizado. Me encanta que puedo aprender a mi ritmo y con mi estilo preferido."</p>
+                    <div class="review-author">
+                        <strong>Carlos Ruiz</strong>
+                        <span>Estudiante de Marketing</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="review-card">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="review-text">"Perfecto para mi familia. Todos podemos aprender diferentes temas con un solo plan familiar."</p>
+                    <div class="review-author">
+                        <strong>Ana Martínez</strong>
+                        <span>Mamá de 3 hijos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Intereses -->
+<div class="modal fade" id="interestsModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modern-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">Personaliza tu aprendizaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="step-indicator mb-4">
+                    <div class="step active" data-step="1">Intereses</div>
+                    <div class="step" data-step="2">Nivel</div>
+                    <div class="step" data-step="3">Crear</div>
+                </div>
+                
+                <!-- Paso 1: Intereses -->
+                <div id="step1" class="step-content">
+                    <h6 class="mb-3">Selecciona tus áreas de interés</h6>
+                    <div class="interests-grid">
+                        <div class="interest-item" data-interest="Tecnología">
+                            <i class="fas fa-laptop-code"></i>
+                            <span>Tecnología</span>
+                        </div>
+                        <div class="interest-item" data-interest="Ciencia">
+                            <i class="fas fa-atom"></i>
+                            <span>Ciencia</span>
+                        </div>
+                        <div class="interest-item" data-interest="Negocios">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Negocios</span>
+                        </div>
+                        <div class="interest-item" data-interest="Arte">
+                            <i class="fas fa-palette"></i>
+                            <span>Arte</span>
+                        </div>
+                        <div class="interest-item" data-interest="Salud">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>Salud</span>
+                        </div>
+                        <div class="interest-item" data-interest="Deportes">
+                            <i class="fas fa-futbol"></i>
+                            <span>Deportes</span>
+                        </div>
+                        <div class="interest-item" data-interest="Educación">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Educación</span>
+                        </div>
+                        <div class="interest-item" data-interest="Marketing">
+                            <i class="fas fa-bullhorn"></i>
+                            <span>Marketing</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 2: Nivel -->
+                <div id="step2" class="step-content d-none">
+                    <h6 class="mb-3">¿Cuál es tu nivel de experiencia?</h6>
+                    <div class="level-options">
+                        <div class="level-option" data-level="principiante">
+                            <div class="level-icon">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <h6>Principiante</h6>
+                            <p>Empezando desde cero</p>
+                        </div>
+                        <div class="level-option" data-level="intermedio">
+                            <div class="level-icon">
+                                <i class="fas fa-tree"></i>
+                            </div>
+                            <h6>Intermedio</h6>
+                            <p>Tengo conocimientos básicos</p>
+                        </div>
+                        <div class="level-option" data-level="avanzado">
+                            <div class="level-icon">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                            <h6>Avanzado</h6>
+                            <p>Quiero profundizar mis conocimientos</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 3: Crear -->
+                <div id="step3" class="step-content d-none">
+                    <h6 class="mb-3">Resumen de tu curso</h6>
+                    <div class="course-summary">
+                        <div class="summary-item">
+                            <strong>Tema:</strong> <span id="summaryTopic"></span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Intereses:</strong> <span id="summaryInterests"></span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Nivel:</strong> <span id="summaryLevel"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="prevStep()" style="display: none;">Anterior</button>
+                <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextStep()">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Sign Up -->
+<div class="modal fade" id="signupModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modern-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">Crea tu cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">Tu curso está siendo generado. Crea una cuenta para guardarlo y acceder a más contenido.</p>
+                <form id="signupForm" action="{% url 'users:signup' %}?next=create-course" method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Hidden fields for course data -->
+                    <input type="hidden" name="course_topic" id="courseTopicHidden">
+                    <input type="hidden" name="course_level" id="courseLevelHidden">
+                    <input type="hidden" name="course_interests" id="courseInterestsHidden">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="signupFirstName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="signupFirstName" name="first_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="signupLastName" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="signupLastName" name="last_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupUsername" class="form-label">Nombre de usuario</label>
+                        <input type="text" class="form-control" id="signupUsername" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="signupEmail" name="email" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="signupPassword" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="signupPassword" name="password1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="signupPassword2" class="form-label">Confirmar contraseña</label>
+                            <input type="password" class="form-control" id="signupPassword2" name="password2" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Crear cuenta</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p class="text-muted">¿Ya tienes cuenta? <a href="{% url 'users:login' %}?next=create-course">Inicia sesión</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modern-modal">
+            <div class="modal-body text-center p-4">
+                <div class="loading-animation mb-3">
+                    <div class="loading-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+                <h6>Generando tu curso</h6>
+                <p class="text-muted mb-0">Esto puede tomar unos minutos...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Plans Section -->
+<div class="plans-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Planes de Suscripción</h2>
+            <p class="section-subtitle">Elige el plan que mejor se adapte a tus necesidades de aprendizaje</p>
+            <div class="discount-banner mb-4">
+                <span class="badge bg-danger fs-6">¡DESCUENTOS ESPECIALES!</span>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <!-- Plan Gratis -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h4>Gratis</h4>
+                        <div class="plan-price">
+                            <span class="price">$0</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> 1 módulo por mes</li>
+                            <li><i class="fas fa-check"></i> Contenido básico</li>
+                            <li><i class="fas fa-check"></i> Acceso limitado</li>
+                        </ul>
+                    </div>
+                    <div class="plan-footer">
+                        <button class="btn btn-outline-primary w-100" disabled>Plan Actual</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plan Aprendiz -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="plan-card featured">
+                    <div class="plan-badge">Recomendado</div>
+                    <div class="plan-header">
+                        <h4>Aprendiz</h4>
+                        <div class="plan-price">
+                            <span class="price">$29.900</span>
+                            <span class="period">/mes</span>
+                            <div class="original-price">$50.000</div>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> 5 cursos por mes</li>
+                            <li><i class="fas fa-check"></i> Perfil con gustos personalizados</li>
+                            <li><i class="fas fa-check"></i> Claude 3.5 Sonnet</li>
+                            <li><i class="fas fa-check"></i> Diplomas al terminar</li>
+                        </ul>
+                    </div>
+                    <div class="plan-footer">
+                        <button class="btn btn-primary w-100">Comenzar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plan Experto -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h4>Experto</h4>
+                        <div class="plan-price">
+                            <span class="price">$49.900</span>
+                            <span class="period">/mes</span>
+                            <div class="original-price">$95.000</div>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Todo lo del Aprendiz</li>
+                            <li><i class="fas fa-check"></i> 10 cursos por mes</li>
+                            <li><i class="fas fa-check"></i> Modelo de IA más avanzado</li>
+                            <li><i class="fas fa-check"></i> Podcast personalizado</li>
+                        </ul>
+                    </div>
+                    <div class="plan-footer">
+                        <button class="btn btn-secondary w-100">Comenzar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plan Familiar -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="plan-card featured">
+                    <div class="plan-badge">Familiar</div>
+                    <div class="plan-header">
+                        <h4>Familiar</h4>
+                        <div class="plan-price">
+                            <span class="price">$69.900</span>
+                            <span class="period">/mes</span>
+                            <div class="original-price">$170.000</div>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> 25 cursos por mes</li>
+                            <li><i class="fas fa-check"></i> Todo lo del Experto</li>
+                            <li><i class="fas fa-check"></i> Múltiples perfiles</li>
+                            <li><i class="fas fa-check"></i> Ideal para familias</li>
+                        </ul>
+                    </div>
+                    <div class="plan-footer">
+                        <button class="btn btn-primary w-100">Comenzar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Hero Section Modern */
+.hero-section-modern {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23e2e8f0" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.5;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--text-dark);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Search Container */
+.search-container {
+    margin-bottom: 2rem;
+}
+
+.search-box {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1.5rem;
+    border: 2px solid var(--border-light);
+    border-radius: 50px;
+    font-size: 1.1rem;
+    background: var(--white);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px);
+}
+
+.search-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Hero Features */
+.hero-features {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.feature-item i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+/* Hero Visual */
+.hero-visual {
+    position: relative;
+    height: 500px;
+}
+
+.floating-card {
+    position: absolute;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+    animation: float 6s ease-in-out infinite;
+    max-width: 280px;
+}
+
+.floating-card:nth-child(1) {
+    top: 0;
+    left: 0;
+    animation-delay: 0s;
+}
+
+.floating-card:nth-child(2) {
+    top: 150px;
+    right: 0;
+    animation-delay: 2s;
+}
+
+.floating-card:nth-child(3) {
+    bottom: 0;
+    left: 50px;
+    animation-delay: 4s;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.card-icon i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.card-content h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.card-content p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Features Section */
+.features-section {
+    background: var(--white);
+}
+
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 16px;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.feature-icon i {
+    color: var(--primary-color);
+    font-size: 2rem;
+}
+
+.feature-card h4 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* Reviews Section */
+.reviews-section {
+    background: var(--bg-light);
+}
+
+.review-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.review-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.review-stars {
+    color: #fbbf24;
+    margin-bottom: 1rem;
+}
+
+.review-text {
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.review-author {
+    display: flex;
+    flex-direction: column;
+}
+
+.review-author strong {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.review-author span {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Modern Modal */
+.modern-modal {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.modern-modal .modal-header {
+    border-bottom: 1px solid var(--border-light);
+    padding: 1.5rem;
+}
+
+.modern-modal .modal-body {
+    padding: 2rem;
+}
+
+.modern-modal .modal-footer {
+    border-top: 1px solid var(--border-light);
+    padding: 1.5rem;
+}
+
+/* Step Indicator */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    position: relative;
+}
+
+.step::before {
+    content: '';
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.step.active {
+    color: var(--primary-color);
+}
+
+.step.active::before {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.step.completed::before {
+    background: var(--success-color);
+    color: var(--white);
+}
+
+/* Interests Grid */
+.interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.interest-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.interest-item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.interest-item.selected {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+}
+
+.interest-item i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.interest-item span {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Level Options */
+.level-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.level-option {
+    padding: 1.5rem;
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.level-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.level-option.selected {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+}
+
+.level-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.level-icon i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.level-option h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.level-option p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Course Summary */
+.course-summary {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* Loading Animation */
+.loading-animation {
+    display: flex;
+    justify-content: center;
+}
+
+.loading-dots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* Plans Section */
+.plans-section {
+    background: var(--white);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.discount-banner {
+    margin-top: 1rem;
+}
+
+.plan-card {
+    background: var(--white);
+    border: 2px solid var(--border-light);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.plan-card.featured {
+    border-color: var(--primary-color);
+    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.15);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.plan-header {
+    margin-bottom: 2rem;
+}
+
+.plan-header h4 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+
+.plan-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.period {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.original-price {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.plan-features {
+    margin-bottom: 2rem;
+}
+
+.plan-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+
+.plan-features i {
+    color: var(--success-color);
+    font-size: 0.9rem;
+}
+
+.plan-footer {
+    margin-top: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-features {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .floating-card {
+        position: relative;
+        margin-bottom: 1rem;
+        animation: none;
+    }
+    
+    .hero-visual {
+        height: auto;
+        margin-top: 2rem;
+    }
+}
+</style>
+
 <script>
-    // Variable global para intereses seleccionados (debe estar antes de usarla)
-    var selectedInterests = [];
+let currentStep = 1;
+let selectedInterests = [];
+let selectedLevel = '';
+let courseTopic = '';
 
-    // Piscina de quotes / micro-tips categorizados
-    const quotesPool = {
-        'Tecnología': [
-            "La tecnología está hecha para amplificar la imaginación humana.",
-            "Cada línea de código es un paso hacia el futuro."
-        ],
-        'Deportes': [
-            "La constancia vence al talento cuando el talento no se esfuerza.",
-            "El sudor de hoy es el éxito de mañana."
-        ],
-        'Negocios': [
-            "Las grandes ideas nacen de grandes retos.",
-            "Emprender es convertir problemas en oportunidades."
-        ],
-        'Arte': [
-            "La creatividad es la inteligencia divirtiéndose.",
-            "El arte lava del alma el polvo de la rutina."
-        ],
-        'Ciencia': [
-            "La ciencia no es solo un conjunto de conocimientos, es una manera de pensar.",
-            "Preguntar es la semilla de todo descubrimiento."
-        ],
-        'Salud': [
-            "Tu cuerpo escucha todo lo que dice tu mente.",
-            "La salud es la riqueza real y no piezas de oro y plata."
-        ],
-        'Educación': [
-            "Aprender nunca agota la mente.",
-            "La educación es el arma más poderosa para cambiar el mundo."
-        ],
-        'Marketing': [
-            "Convierte a los extraños en amigos y a los amigos en clientes.",
-            "El buen marketing hace que la empresa parezca inteligente."
-        ],
-        'default': [
-            "Cada segundo cuenta, ¡sigue avanzando!",
-            "El conocimiento es un viaje, no un destino."
-        ]
-    };
+function startCourseCreation() {
+    courseTopic = document.getElementById('topicSearch').value.trim();
+    if (!courseTopic) {
+        alert('Por favor, ingresa un tema para aprender');
+        return;
+    }
+    
+    // Mostrar modal de intereses
+    const modal = new bootstrap.Modal(document.getElementById('interestsModal'));
+    modal.show();
+}
 
-    // Variables globales para controlar la carga
-    let pollInterval = null;
-    let timeoutTimer = null;
-    let courseFinished = false;
-
-    // Devuelve una quote aleatoria basada en los intereses seleccionados
-    function getRandomQuote() {
-        let pool = [];
-        selectedInterests.forEach(int => {
-            if (quotesPool[int]) {
-                pool = pool.concat(quotesPool[int]);
-            }
-        });
-        if (pool.length === 0) {
-            pool = quotesPool['default'];
+function nextStep() {
+    if (currentStep === 1) {
+        if (selectedInterests.length === 0) {
+            alert('Por favor, selecciona al menos un interés');
+            return;
         }
-        return pool[Math.floor(Math.random() * pool.length)];
-    }
-
-    function showInitialProgress(courseId) {
-        document.getElementById('result-area').innerHTML = `
-            <div class="alert alert-success">
-                <h5><i class="fas fa-check-circle me-2"></i>Curso Creado Exitosamente</h5>
-                <p>Tu curso está siendo generado. ID: <code>${courseId}</code></p>
-                <div class="progress mb-2">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 25%"></div>
-                </div>
-                <small>Generando metadata del curso...</small>
-                <div class="mt-3 fst-italic text-secondary">"${getRandomQuote()}"</div>
-            </div>
-        `;
-    }
-
-    function startPolling(courseId) {
-        // Reiniciar timers si fuese necesario
-        if (pollInterval) clearInterval(pollInterval);
-        if (timeoutTimer) clearTimeout(timeoutTimer);
-        courseFinished = false;
-
-        pollInterval = setInterval(function() {
-            fetch(`/course/${courseId}/status/`)
-                .then(response => response.json())
-                .then(data => {
-                    updateProgress(data);
-
-                    // Manejar errores
-                    if (data.status === 'failed') {
-                        clearInterval(pollInterval);
-                        clearTimeout(timeoutTimer);
-                        showError();
-                        return;
-                    }
-
-                    // Mostrar disponibilidad temprana y, si está completo, detener timers
-                    if ([
-                        'metadata_ready',
-                        'generating_module_1',
-                        'ready',
-                        'generating_remaining',
-                        'complete'
-                    ].includes(data.status)) {
-                        showCourseReady(courseId, data);
-
-                        if (data.status === 'complete') {
-                            courseFinished = true;
-                            clearInterval(pollInterval);
-                            clearTimeout(timeoutTimer);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error polling course status:', error);
-                    clearInterval(pollInterval);
-                    clearTimeout(timeoutTimer);
-                    showError();
-                });
-        }, 5000); // Poll cada 5 segundos
-
-        // Timeout de 40s para evitar espera indefinida
-        timeoutTimer = setTimeout(function() {
-            if (!courseFinished) {
-                clearInterval(pollInterval);
-                showTimeoutError();
-            }
-        }, 40000);
-    }
-
-    function updateProgress(data) {
-        let progressPercent = data.progress_percentage || 0;
-        let statusText = getStatusText(data.status);
-
-        document.getElementById('result-area').innerHTML = `
-            <div class="alert alert-info">
-                <h5><i class="fas fa-cog fa-spin me-2"></i>Generando Curso</h5>
-                <p class="mb-1">Estado: <strong>${statusText}</strong></p>
-                <div class="progress mb-2">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${progressPercent}%"></div>
-                </div>
-                <small class="d-block mb-2">${progressPercent}% completado</small>
-                <em class="text-secondary">"${getRandomQuote()}"</em>
-            </div>
-        `;
-    }
-
-    function getStatusText(status) {
-        const statusMap = {
-            'generating_metadata': 'Generando estructura del curso...',
-            'metadata_ready': 'Estructura lista - ¡Ya puedes ver el curso!',
-            'generating_module_1': 'Preparando contenido inicial...',
-            'ready': 'Primer módulo listo - ¡Puedes empezar!',
-            'generating_remaining': 'Completando módulos restantes...',
-            'complete': 'Curso completamente generado',
-            'failed': 'Error en la generación'
-        };
-        return statusMap[status] || status;
-    }
-
-    function showCourseReady(courseId, data) {
-        let statusMessage = '';
-        let statusClass = 'success';
-        
-        if (data.status === 'metadata_ready') {
-            statusMessage = 'Estructura del curso lista. El contenido se está generando en background.';
-            statusClass = 'info';
-        } else if (data.status === 'generating_module_1') {
-            statusMessage = 'Puedes explorar la estructura mientras generamos el primer módulo.';
-            statusClass = 'info';
-        } else if (data.status === 'ready') {
-            statusMessage = 'Primer módulo listo. Los módulos restantes se están generando mientras navegas.';
-            statusClass = 'success';
-        } else if (data.status === 'generating_remaining') {
-            statusMessage = 'Primer módulo disponible. Módulos restantes generándose en background.';
-            statusClass = 'success';
-        } else if (data.status === 'complete') {
-            statusMessage = 'Curso completamente generado y listo para consumir.';
-            statusClass = 'success';
+        showStep(2);
+    } else if (currentStep === 2) {
+        if (!selectedLevel) {
+            alert('Por favor, selecciona tu nivel');
+            return;
         }
-        
-        document.getElementById('result-area').innerHTML = `
-            <div class="alert alert-${statusClass}">
-                <h5><i class="fas fa-check-circle me-2"></i>¡Curso Disponible!</h5>
-                <p><strong>${data.title || 'Tu curso'}</strong></p>
-                <p class="mb-3">${statusMessage}</p>
-                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                    <a href="/course/${courseId}/" class="btn btn-primary">
-                        <i class="fas fa-play me-2"></i>Ver Curso
-                    </a>
-                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
-                    </a>
-                </div>
-            </div>
-        `;
+        showStep(3);
+        updateSummary();
+    } else if (currentStep === 3) {
+        createCourse();
     }
+}
 
-    function showError() {
-        document.getElementById('result-area').innerHTML = `
-            <div class="alert alert-danger">
-                <h5><i class="fas fa-exclamation-triangle me-2"></i>Error</h5>
-                <p>Hubo un problema generando tu curso. Por favor, inténtalo de nuevo.</p>
-                <button class="btn btn-outline-danger" onclick="location.reload()">
-                    <i class="fas fa-redo me-2"></i>Intentar de Nuevo
-                </button>
-            </div>
-        `;
+function prevStep() {
+    if (currentStep > 1) {
+        showStep(currentStep - 1);
     }
+}
 
-    function showTimeoutError() {
-        document.getElementById('result-area').innerHTML = `
-            <div class="alert alert-warning">
-                <h5><i class="fas fa-hourglass-half me-2"></i>Esto está tardando más de lo esperado</h5>
-                <p>Puede que algo haya fallado durante la generación. ¡No te preocupes! Puedes reintentar usando tu mismo prompt sin perder nada.</p>
-                <button class="btn btn-primary me-2" onclick="location.reload()">
-                    <i class="fas fa-redo me-1"></i>Reintentar
-                </button>
-            </div>
-        `;
-    }
-
-    // Manejar formulario y enviar datos al backend
-    document.getElementById('courseForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const form = this;
-        const submitBtn = document.getElementById('submitBtn');
-        const originalText = submitBtn.innerHTML;
-
-        // Deshabilitar botón y mostrar spinner
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
-
-        // Recolectar intereses seleccionados
-        const interests = [];
-        document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(checkbox) {
-            interests.push(checkbox.value);
-        });
-        selectedInterests = interests; // Guardamos intereses para las quotes
-
-        // Preparar datos de formulario
-        const formData = new FormData(form);
-        formData.set('user_interests', JSON.stringify(interests));
-
-        // Enviar solicitud
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Error: ' + data.error);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            } else {
-                const courseId = data.id;
-                showInitialProgress(courseId);
-                startPolling(courseId);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al crear el curso. Por favor intenta de nuevo.');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        });
+function showStep(step) {
+    // Ocultar todos los pasos
+    document.querySelectorAll('.step-content').forEach(el => el.classList.add('d-none'));
+    
+    // Mostrar el paso actual
+    document.getElementById(`step${step}`).classList.remove('d-none');
+    
+    // Actualizar indicador
+    document.querySelectorAll('.step').forEach((el, index) => {
+        el.classList.remove('active', 'completed');
+        if (index + 1 < step) {
+            el.classList.add('completed');
+        } else if (index + 1 === step) {
+            el.classList.add('active');
+        }
     });
+    
+    // Actualizar botones
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    prevBtn.style.display = step > 1 ? 'block' : 'none';
+    nextBtn.textContent = step === 3 ? 'Crear Curso' : 'Siguiente';
+    
+    currentStep = step;
+}
+
+function updateSummary() {
+    document.getElementById('summaryTopic').textContent = courseTopic;
+    document.getElementById('summaryInterests').textContent = selectedInterests.join(', ');
+    document.getElementById('summaryLevel').textContent = getLevelDisplay(selectedLevel);
+}
+
+function getLevelDisplay(level) {
+    const levels = {
+        'principiante': 'Principiante',
+        'intermedio': 'Intermedio',
+        'avanzado': 'Avanzado'
+    };
+    return levels[level] || level;
+}
+
+function createCourse() {
+    // Cerrar modal de intereses
+    const interestsModal = bootstrap.Modal.getInstance(document.getElementById('interestsModal'));
+    interestsModal.hide();
+    
+    // Mostrar loading
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+    
+    // Simular creación del curso (para usuarios no autenticados)
+    setTimeout(() => {
+        loadingModal.hide();
+        
+        // Mostrar modal de signup
+        const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+        signupModal.show();
+    }, 3000);
+}
+
+// Event listeners para intereses
+document.querySelectorAll('.interest-item').forEach(item => {
+    item.addEventListener('click', function() {
+        const interest = this.dataset.interest;
+        if (this.classList.contains('selected')) {
+            this.classList.remove('selected');
+            selectedInterests = selectedInterests.filter(i => i !== interest);
+        } else {
+            this.classList.add('selected');
+            selectedInterests.push(interest);
+        }
+    });
+});
+
+// Event listeners para niveles
+document.querySelectorAll('.level-option').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.level-option').forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedLevel = this.dataset.level;
+    });
+});
+
+// Enter key en el buscador
+document.getElementById('topicSearch').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        startCourseCreation();
+    }
+});
+
+// Cuando se muestra el modal de signup, guardar los datos del curso
+document.getElementById('signupModal').addEventListener('show.bs.modal', function() {
+    document.getElementById('courseTopicHidden').value = courseTopic;
+    document.getElementById('courseLevelHidden').value = selectedLevel;
+    document.getElementById('courseInterestsHidden').value = JSON.stringify(selectedInterests);
+});
 </script>
 {% endblock %} 

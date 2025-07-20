@@ -10,22 +10,58 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h1 class="fw-bold mb-2">
-                        ¡Hola, {{ user.first_name|default:user.username }}! 👋
+                        Bienvenido, {{ user.first_name|default:user.username }}
                     </h1>
-                    <p class="text-muted mb-0">Bienvenido a tu dashboard de Cursia</p>
+                    <p class="text-muted mb-0">Tu centro de aprendizaje personalizado</p>
                 </div>
                 <div>
                     {% if can_create_more %}
                         <a href="{% url 'new_course' %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>
                             Crear Nuevo Curso
                         </a>
                     {% else %}
                         <button class="btn btn-outline-secondary" disabled title="Límite de cursos alcanzado para tu plan">
-                            <i class="fas fa-lock me-2"></i>
                             Límite Alcanzado
                         </button>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Info -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold mb-1">
+                                Plan {{ current_plan.name }}
+                                {% if current_plan.name != 'Gratis' %}
+                                    <span class="badge bg-success ms-2">Activo</span>
+                                {% endif %}
+                            </h6>
+                            <p class="text-muted mb-2">
+                                Cursos disponibles: <strong>{{ courses_remaining }}</strong> de {{ current_plan.courses }} este mes
+                            </p>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {% widthratio courses_remaining current_plan.courses 100 %}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if current_plan.name == 'Gratis' %}
+                                <button class="btn btn-secondary" onclick="showUpgradeModal()">
+                                    Actualizar Plan
+                                </button>
+                            {% else %}
+                                <div class="text-muted">
+                                    <small>Próxima renovación: 30 días</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -36,7 +72,7 @@
         <div class="col-md-3 mb-3">
             <div class="stats-card">
                 <div class="stats-number">{{ stats.total_courses }}</div>
-                <div class="stats-label">Total de Cursos</div>
+                <div class="stats-label">Cursos Creados</div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
@@ -82,27 +118,22 @@
                                         <!-- Status Badge -->
                                         {% if course.status == 'generating_metadata' or course.status == 'generating_modules_metadata' or course.status == 'generating_module_1' %}
                                             <span class="status-badge badge-generating">
-                                                <i class="fas fa-spinner fa-spin me-1"></i>
                                                 Generando
                                             </span>
                                         {% elif course.status == 'ready' or course.status == 'generating_remaining' %}
                                             <span class="status-badge badge-ready">
-                                                <i class="fas fa-play me-1"></i>
                                                 Listo
                                             </span>
                                         {% elif course.status == 'complete' %}
                                             <span class="status-badge badge-complete">
-                                                <i class="fas fa-check me-1"></i>
                                                 Completo
                                             </span>
                                         {% elif course.status == 'failed' %}
                                             <span class="status-badge badge-failed">
-                                                <i class="fas fa-exclamation-triangle me-1"></i>
                                                 Error
                                             </span>
                                         {% else %}
                                             <span class="status-badge badge-generating">
-                                                <i class="fas fa-clock me-1"></i>
                                                 Procesando
                                             </span>
                                         {% endif %}
@@ -151,17 +182,14 @@
                                     <div class="d-flex gap-2">
                                         {% if course.status == 'ready' or course.status == 'generating_remaining' or course.status == 'complete' %}
                                             <a href="{% url 'course_view' course.id %}" class="btn btn-primary btn-sm flex-fill">
-                                                <i class="fas fa-eye me-1"></i>
                                                 Ver Curso
                                             </a>
                                         {% elif course.status == 'metadata_ready' %}
                                             <a href="{% url 'course_metadata' course.id %}" class="btn btn-outline-primary btn-sm flex-fill">
-                                                <i class="fas fa-info-circle me-1"></i>
                                                 Ver Info
                                             </a>
                                         {% else %}
                                             <button class="btn btn-outline-secondary btn-sm flex-fill" disabled>
-                                                <i class="fas fa-hourglass-half me-1"></i>
                                                 Generando...
                                             </button>
                                         {% endif %}
@@ -175,7 +203,6 @@
 
                                     <!-- Created Date -->
                                     <small class="text-muted d-block mt-2">
-                                        <i class="fas fa-calendar me-1"></i>
                                         Creado el {{ course.created_at|date:"d/m/Y" }}
                                     </small>
                                 </div>
@@ -189,19 +216,17 @@
                     <div class="mb-4">
                         <i class="fas fa-graduation-cap" style="font-size: 4rem; color: var(--primary-color); opacity: 0.5;"></i>
                     </div>
-                    <h4 class="fw-bold mb-3">¡Crea tu primer curso!</h4>
+                    <h4 class="fw-bold mb-3">Comienza tu aprendizaje</h4>
                     <p class="text-muted mb-4">
                         Aún no tienes cursos creados. Utiliza nuestra IA para generar 
-                        contenido educativo de calidad en minutos.
+                        contenido educativo personalizado.
                     </p>
                     {% if can_create_more %}
                         <a href="{% url 'new_course' %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-plus me-2"></i>
                             Crear Mi Primer Curso
                         </a>
                     {% else %}
                         <p class="text-warning">
-                            <i class="fas fa-lock me-1"></i>
                             Has alcanzado el límite de cursos para tu plan {{ user.get_membership_display }}.
                         </p>
                     {% endif %}
@@ -211,111 +236,88 @@
     </div>
 </div>
 
+<!-- Upgrade Modal -->
+{% include 'components/pricing_modal.html' %}
 
-
-{% endblock %}
-
-{% block extra_js %}
 <script>
-    /* --- Helper para obtener la cookie CSRF (recomendado por la documentación de Django) --- */
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+function showUpgradeModal() {
+    const pricingModal = new bootstrap.Modal(document.getElementById('pricingModal'));
+    pricingModal.show();
+}
 
-    /* --- Crear dinámicamente un modal Bootstrap para confirmar la eliminación --- */
-    function ensureDeleteModal() {
-        if (document.getElementById('deleteCourseModal')) {
-            return; // Ya existe
-        }
-        const modalHTML = `
-            <div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-danger text-white">
-                            <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Eliminar Curso</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+function confirmDelete(courseId, courseTitle) {
+    if (confirm(`¿Estás seguro de que quieres eliminar "${courseTitle}"? Esta acción no se puede deshacer.`)) {
+        // Aquí puedes agregar la lógica para eliminar el curso
+        console.log('Eliminando curso:', courseId);
+        // Por ahora solo muestra un mensaje
+        alert('Función de eliminación en desarrollo');
+    }
+}
+</script>
+<div class="modal fade" id="upgradeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Planes de Suscripción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Plan Gratis -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card plan-card h-100">
+                            <div class="card-body text-center p-4">
+                                <h4 class="fw-bold mb-3">Gratis</h4>
+                                <div class="mb-3">
+                                    <span class="display-6 fw-bold">$0</span>
+                                    <span class="text-muted">/mes</span>
+                                </div>
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">2 cursos por mes</li>
+                                    <li class="mb-2">Contenido básico</li>
+                                    <li class="mb-2">Acceso limitado</li>
+                                </ul>
+                                <button class="btn btn-outline-primary w-100" disabled>Plan Actual</button>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <p>¿Seguro que deseas eliminar "<strong id="deleteCourseTitle"></strong>"? Esta acción es permanente.</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i>Eliminar
-                            </button>
+                    </div>
+                    
+                    <!-- Plan Pro -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card plan-card featured h-100">
+                            <div class="card-body text-center p-4">
+                                <h4 class="fw-bold mb-3">Pro</h4>
+                                <div class="mb-3">
+                                    <span class="display-6 fw-bold">$19</span>
+                                    <span class="text-muted">/mes</span>
+                                </div>
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">5 cursos por mes</li>
+                                    <li class="mb-2">Modelo de IA mejorado</li>
+                                    <li class="mb-2">Generación de podcast</li>
+                                    <li class="mb-2">Contenido premium</li>
+                                </ul>
+                                <button class="btn btn-primary w-100">Actualizar a Pro</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showUpgradeModal() {
+    var modal = new bootstrap.Modal(document.getElementById('upgradeModal'));
+    modal.show();
+}
+
+function confirmDelete(courseId, courseTitle) {
+    if (confirm('¿Estás seguro de que quieres eliminar "' + courseTitle + '"?')) {
+        // Aquí iría la lógica para eliminar el curso
+        console.log('Eliminando curso:', courseId);
     }
-
-    // Mostrar modal y manejar confirmación
-    function confirmDelete(courseId, courseTitle) {
-        ensureDeleteModal();
-
-        // Actualizar texto del modal
-        document.getElementById('deleteCourseTitle').textContent = courseTitle;
-
-        // Mostrar modal
-        const modalElement = document.getElementById('deleteCourseModal');
-        const bootstrapModal = new bootstrap.Modal(modalElement);
-        bootstrapModal.show();
-
-        // Configurar botón de confirmación
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-
-        // Eliminar event listener previo, si existe
-        confirmBtn.replaceWith(confirmBtn.cloneNode(true));
-        const newConfirmBtn = document.getElementById('confirmDeleteBtn');
-
-        newConfirmBtn.addEventListener('click', () => {
-            newConfirmBtn.disabled = true;
-            newConfirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Eliminando...';
-
-            fetch(`/course/${courseId}/delete/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al eliminar el curso');
-                }
-                return response.json();
-            })
-            .then(data => {
-                bootstrapModal.hide();
-                window.location.reload();
-            })
-            .catch(error => {
-                console.error(error);
-                newConfirmBtn.disabled = false;
-                newConfirmBtn.innerHTML = '<i class="fas fa-trash me-1"></i>Eliminar';
-                alert('Ocurrió un error al eliminar el curso. Intenta nuevamente.');
-            });
-        });
-    }
-    
-    // Auto-refresh for courses that are generating
-    const hasGeneratingCourses = {{ stats.generating_courses }} > 0;
-    if (hasGeneratingCourses) {
-        setTimeout(() => {
-            window.location.reload();
-        }, 30000); // Refresh every 30 seconds
-    }
+}
 </script>
 {% endblock %} 

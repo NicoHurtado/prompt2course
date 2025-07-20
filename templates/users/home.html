@@ -1,61 +1,143 @@
 {% extends 'base.html' %}
 
-{% block title %}Cursia - Crea Cursos Inteligentes en Minutos{% endblock %}
+{% block title %}Cursia - Crea Cursos con IA en Minutos{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero-section">
+<!-- Hero Section with Search -->
+<section class="hero-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 100vh; display: flex; align-items: center;">
     <div class="container">
-        <div class="row align-items-center min-vh-75">
-            <div class="col-lg-6">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center">
                 <div class="fade-in">
-                    <h1 class="display-4 fw-bold text-dark mb-4">
-                        Crea cursos <span style="color: var(--primary-color);">inteligentes</span> en minutos
+                    <h1 class="display-3 fw-bold mb-4">
+                        🚀 Convierte cualquier idea en un <span style="color: #FFD700;">curso completo</span>
                     </h1>
-                    <p class="lead text-muted mb-4">
-                        Transforma cualquier idea en un curso completo e interactivo usando inteligencia artificial. 
-                        Con Cursia, generas contenido de calidad profesional en tiempo récord.
+                    <p class="lead mb-5" style="font-size: 1.3rem; opacity: 0.9;">
+                        Solo escribe qué quieres enseñar y nuestra IA crea el curso completo en minutos.<br>
+                        <strong>¡Miles ya están ganando dinero con sus cursos!</strong>
                     </p>
-                    <div class="d-flex flex-column flex-sm-row gap-3">
-                        <a href="{% url 'users:signup' %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-rocket me-2"></i>
-                            Crear mi primera cuenta gratis
-                        </a>
-                        <a href="{% url 'users:login' %}" class="btn btn-outline-primary btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>
-                            Ya tengo cuenta
-                        </a>
+                    
+                    <!-- Search Bar Principal -->
+                    <div class="search-container mb-4">
+                        <div class="search-box" style="max-width: 700px; margin: 0 auto; position: relative;">
+                            <div class="input-group" style="height: 60px;">
+                                <input 
+                                    type="text" 
+                                    class="form-control search-input" 
+                                    id="course-search"
+                                    placeholder="Ej: Cómo invertir en criptomonedas para principiantes"
+                                    style="height: 100%; font-size: 1.1rem; border: none; border-radius: 15px 0 0 15px; padding-left: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);"
+                                >
+                                <button class="btn btn-warning btn-lg create-course-btn" type="button" style="height: 100%; border-radius: 0 15px 15px 0; font-weight: bold; padding: 0 30px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                    <i class="fas fa-magic me-2"></i>CREAR MI CURSO
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="text-center">
-                    <div class="card shadow-lg border-0" style="background: linear-gradient(135deg, var(--primary-light) 0%, white 100%);">
-                        <div class="card-body p-5">
-                            <div class="row g-4">
-                                <div class="col-6">
-                                    <div class="stats-card h-100">
-                                        <div class="stats-number">⚡</div>
-                                        <div class="stats-label">Generación instantánea</div>
+                    
+                    <!-- Course Examples Carousel -->
+                    <div class="examples-section mb-5">
+                        <p class="mb-3" style="opacity: 0.8;">💡 <strong>Ideas populares que están generando ingresos:</strong></p>
+                        <div class="examples-carousel">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="example-card" onclick="setSearchExample(this)" data-example="Cómo crear un negocio de dropshipping rentable desde cero">
+                                        <div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.3s;">
+                                            <div class="text-white">
+                                                <i class="fas fa-store fa-2x mb-2" style="color: #FFD700;"></i>
+                                                <h6 class="fw-bold">Dropshipping</h6>
+                                                <small>"Cómo crear un negocio de dropshipping rentable desde cero"</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="stats-card h-100">
-                                        <div class="stats-number">🎯</div>
-                                        <div class="stats-label">Contenido personalizado</div>
+                                <div class="col-md-4">
+                                    <div class="example-card" onclick="setSearchExample(this)" data-example="Trading de criptomonedas: estrategias para principiantes">
+                                        <div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.3s;">
+                                            <div class="text-white">
+                                                <i class="fab fa-bitcoin fa-2x mb-2" style="color: #FFD700;"></i>
+                                                <h6 class="fw-bold">Criptomonedas</h6>
+                                                <small>"Trading de criptomonedas: estrategias para principiantes"</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="stats-card h-100">
-                                        <div class="stats-number">📱</div>
-                                        <div class="stats-label">Acceso multiplataforma</div>
+                                <div class="col-md-4">
+                                    <div class="example-card" onclick="setSearchExample(this)" data-example="Yoga terapéutico para dolor de espalda en oficinistas">
+                                        <div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.3s;">
+                                            <div class="text-white">
+                                                <i class="fas fa-heart fa-2x mb-2" style="color: #FFD700;"></i>
+                                                <h6 class="fw-bold">Bienestar</h6>
+                                                <small>"Yoga terapéutico para dolor de espalda en oficinistas"</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="stats-card h-100">
-                                        <div class="stats-number">🏆</div>
-                                        <div class="stats-label">Calidad profesional</div>
+                            </div>
+                            
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-4">
+                                    <div class="example-card" onclick="setSearchExample(this)" data-example="Marketing digital para restaurantes locales">
+                                        <div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.3s;">
+                                            <div class="text-white">
+                                                <i class="fas fa-utensils fa-2x mb-2" style="color: #FFD700;"></i>
+                                                <h6 class="fw-bold">Marketing</h6>
+                                                <small>"Marketing digital para restaurantes locales"</small>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="example-card" onclick="setSearchExample(this)" data-example="Python para análisis de datos financieros">
+                                        <div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.3s;">
+                                            <div class="text-white">
+                                                <i class="fab fa-python fa-2x mb-2" style="color: #FFD700;"></i>
+                                                <h6 class="fw-bold">Programación</h6>
+                                                <small>"Python para análisis de datos financieros"</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="example-card" onclick="setSearchExample(this)" data-example="Fotografía de productos para e-commerce">
+                                        <div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.3s;">
+                                            <div class="text-white">
+                                                <i class="fas fa-camera fa-2x mb-2" style="color: #FFD700;"></i>
+                                                <h6 class="fw-bold">Fotografía</h6>
+                                                <small>"Fotografía de productos para e-commerce"</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trust Indicators -->
+                    <div class="trust-indicators">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold text-warning">12,847+</h3>
+                                    <p>Cursos creados</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold text-warning">$2.3M+</h3>
+                                    <p>Generados por usuarios</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold text-warning">4.9⭐</h3>
+                                    <p>Calificación promedio</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold text-warning">< 5 min</h3>
+                                    <p>Tiempo promedio</p>
                                 </div>
                             </div>
                         </div>
@@ -66,57 +148,57 @@
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="py-5">
+<!-- Social Proof Section -->
+<section class="py-5" style="background: #f8f9fa;">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h2 class="fw-bold mb-3">¿Por qué elegir Cursia?</h2>
-                <p class="text-muted">La plataforma más avanzada para crear cursos educativos</p>
+                <h2 class="fw-bold mb-3">🎯 ¿Por qué miles eligen Cursia?</h2>
+                <p class="text-muted">La plataforma más rápida y fácil para crear cursos rentables</p>
             </div>
         </div>
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100 border-0 text-center">
+                <div class="card h-100 border-0 text-center" style="box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
                     <div class="card-body p-4">
                         <div class="mb-3">
-                            <i class="fas fa-brain" style="font-size: 3rem; color: var(--primary-color);"></i>
+                            <i class="fas fa-robot" style="font-size: 3rem; color: #667eea;"></i>
                         </div>
-                        <h5 class="fw-bold">IA Avanzada</h5>
+                        <h5 class="fw-bold">🚀 IA de Última Generación</h5>
                         <p class="text-muted">
-                            Utilizamos Claude AI para generar contenido educativo de alta calidad, 
-                            estructurado y pedagógicamente sólido.
+                            Claude AI estructura tu curso automáticamente con módulos, ejemplos 
+                            y ejercicios prácticos. ¡Como tener un pedagogo experto 24/7!
                         </p>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="card h-100 border-0 text-center">
+                <div class="card h-100 border-0 text-center" style="box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
                     <div class="card-body p-4">
                         <div class="mb-3">
-                            <i class="fas fa-clock" style="font-size: 3rem; color: var(--primary-color);"></i>
+                            <i class="fas fa-clock" style="font-size: 3rem; color: #667eea;"></i>
                         </div>
-                        <h5 class="fw-bold">Súper Rápido</h5>
+                        <h5 class="fw-bold">⚡ Resultados en Minutos</h5>
                         <p class="text-muted">
-                            Genera cursos completos en minutos, no semanas. 
-                            Desde la estructura hasta el contenido multimedia.
+                            Lo que te tomaría semanas, lo tienes listo en 5 minutos. 
+                            Contenido, videos, audios y materiales descargables incluidos.
                         </p>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="card h-100 border-0 text-center">
+                <div class="card h-100 border-0 text-center" style="box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
                     <div class="card-body p-4">
                         <div class="mb-3">
-                            <i class="fas fa-users" style="font-size: 3rem; color: var(--primary-color);"></i>
+                            <i class="fas fa-money-bill-wave" style="font-size: 3rem; color: #667eea;"></i>
                         </div>
-                        <h5 class="fw-bold">Para Todos</h5>
+                        <h5 class="fw-bold">💰 Monetiza Inmediatamente</h5>
                         <p class="text-muted">
-                            Perfecto para educadores, empresas, creadores de contenido 
-                            y cualquiera que quiera enseñar.
+                            Publica en Udemy, Teachable, o tu propia plataforma. 
+                            Usuarios promedio recuperan la inversión en 30 días.
                         </p>
                     </div>
                 </div>
@@ -125,82 +207,153 @@
     </div>
 </section>
 
-<!-- How it Works Section -->
-<section class="py-5" style="background-color: var(--bg-light);">
+<!-- Testimonials -->
+<section class="py-5" style="background: white;">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h2 class="fw-bold mb-3">¿Cómo funciona?</h2>
-                <p class="text-muted">En solo 3 pasos tienes tu curso listo</p>
+                <h2 class="fw-bold mb-3">💬 Lo que dicen nuestros usuarios</h2>
             </div>
         </div>
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="text-center">
-                    <div class="mb-3">
-                        <div style="width: 80px; height: 80px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <span style="color: white; font-size: 2rem; font-weight: bold;">1</span>
+                <div class="card border-0" style="box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="text-warning">⭐⭐⭐⭐⭐</div>
+                        </div>
+                        <p class="mb-3">"En 2 horas creé mi curso de repostería y ya llevo $800 vendidos en Udemy. ¡Es increíble!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3" style="width: 40px; height: 40px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">M</div>
+                            <div>
+                                <strong>María González</strong><br>
+                                <small class="text-muted">Chef repostera</small>
+                            </div>
                         </div>
                     </div>
-                    <h5 class="fw-bold">Describe tu curso</h5>
-                    <p class="text-muted">
-                        Cuéntanos qué quieres enseñar, el nivel de tus estudiantes 
-                        y cualquier detalle específico.
-                    </p>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="text-center">
-                    <div class="mb-3">
-                        <div style="width: 80px; height: 80px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <span style="color: white; font-size: 2rem; font-weight: bold;">2</span>
+                <div class="card border-0" style="box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="text-warning">⭐⭐⭐⭐⭐</div>
+                        </div>
+                        <p class="mb-3">"Como desarrollador, pensé que crear cursos sería difícil. Con Cursia fue súper fácil y profesional."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3" style="width: 40px; height: 40px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">C</div>
+                            <div>
+                                <strong>Carlos Méndez</strong><br>
+                                <small class="text-muted">Desarrollador Full Stack</small>
+                            </div>
                         </div>
                     </div>
-                    <h5 class="fw-bold">IA genera el contenido</h5>
-                    <p class="text-muted">
-                        Nuestra inteligencia artificial crea la estructura, 
-                        contenido, ejemplos y recursos automáticamente.
-                    </p>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="text-center">
-                    <div class="mb-3">
-                        <div style="width: 80px; height: 80px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <span style="color: white; font-size: 2rem; font-weight: bold;">3</span>
+                <div class="card border-0" style="box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="text-warning">⭐⭐⭐⭐⭐</div>
+                        </div>
+                        <p class="mb-3">"Publiqué mi curso de marketing y en el primer mes gané $1,200. ¡Vale cada peso!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3" style="width: 40px; height: 40px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">A</div>
+                            <div>
+                                <strong>Ana Rodríguez</strong><br>
+                                <small class="text-muted">Marketing Digital</small>
+                            </div>
                         </div>
                     </div>
-                    <h5 class="fw-bold">¡Listo para enseñar!</h5>
-                    <p class="text-muted">
-                        Tu curso está completo con videos, ejercicios, 
-                        evaluaciones y todo lo que necesitas.
-                    </p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="text-center">
-                    <h2 class="fw-bold mb-3">¿Listo para crear tu primer curso?</h2>
-                    <p class="text-muted mb-4">Únete a miles de educadores que ya confían en Cursia</p>
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="{% url 'users:signup' %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-rocket me-2"></i>
-                            Empezar gratis ahora
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Final CTA -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">🎯 ¡Empieza tu primer curso GRATIS ahora!</h2>
+        <p class="lead mb-4">Únete a miles que ya están generando ingresos con sus conocimientos</p>
+        <button class="btn btn-warning btn-lg create-course-btn" style="padding: 15px 40px; font-size: 1.2rem; font-weight: bold;">
+            <i class="fas fa-rocket me-2"></i>CREAR MI PRIMER CURSO GRATIS
+        </button>
+        <p class="mt-3 mb-0" style="opacity: 0.8;">
+            ✅ Sin tarjeta de crédito • ✅ Primer curso gratis • ✅ Resultados en 5 minutos
+        </p>
     </div>
 </section>
+
+<style>
+.example-card:hover .card {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.15) !important;
+    border-color: rgba(255,215,0,0.5) !important;
+}
+
+.search-input:focus {
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25) !important;
+}
+
+.create-course-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
+}
+
+.stat-item {
+    margin-bottom: 20px;
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+function setSearchExample(element) {
+    const example = element.getAttribute('data-example');
+    document.getElementById('course-search').value = example;
+    
+    // Animate the clicked card
+    element.querySelector('.card').style.background = 'rgba(255,215,0,0.2)';
+    setTimeout(() => {
+        element.querySelector('.card').style.background = 'rgba(255,255,255,0.1)';
+    }, 1000);
+}
+
+// Handle create course button clicks
+document.addEventListener('DOMContentLoaded', function() {
+    const createButtons = document.querySelectorAll('.create-course-btn');
+    
+    createButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const searchInput = document.getElementById('course-search');
+            const prompt = searchInput.value.trim();
+            
+            if (prompt.length < 10) {
+                alert('Por favor describe tu idea de curso con más detalle (mínimo 10 caracteres)');
+                searchInput.focus();
+                return;
+            }
+            
+            // Store the prompt and redirect to signup
+            sessionStorage.setItem('coursePrompt', prompt);
+            window.location.href = '{% url "users:signup" %}?next=create-course';
+        });
+    });
+    
+    // Auto-focus search on page load
+    document.getElementById('course-search').focus();
+});
+</script>
 {% endblock %} 

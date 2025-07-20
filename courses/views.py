@@ -7,38 +7,50 @@ import json
 from .models import Course, Module, UserProgress
 from django.urls import reverse
 from generation.tasks import generate_course_metadata, generate_remaining_modules, regenerate_missing_modules
+from django.contrib import messages
 
 
 @login_required
 def index(request):
     """Vista principal para crear cursos"""
-    # Permitir siempre crear cursos
+    # Verificar límites de suscripción
+    user = request.user
+    can_create = user.can_create_course()
+    courses_remaining = user.get_courses_remaining()
+    plan_info = user.get_plan_price_info()
+    
     context = {
-        'can_create_more': True,
+        'can_create_more': can_create,
+        'courses_remaining': courses_remaining,
+        'current_plan': plan_info,
+        'show_paywall': not can_create,
     }
-    return render(request, 'index.html', context)
+    return render(request, 'course_creation.html', context)
 
 
 @login_required
-@csrf_exempt
-@require_http_methods(["POST"])
-def simple_course_create(request):
-    """Vista para crear cursos reales usando la API de Claude"""
-    try:
-        # Permitir siempre crear cursos
+def create_course_from_home(request):
+    """Vista para crear cursos desde el flujo del home"""
+    if request.method == 'POST':
+        # Verificar límites de suscripción
+        user = request.user
+        if not user.can_create_course():
+            messages.error(request, 'Has alcanzado el límite de cursos para tu plan actual')
+            return redirect('users:dashboard')
+        
         # Obtener datos del formulario
         user_prompt = request.POST.get('user_prompt', '').strip()
         user_level = request.POST.get('user_level', 'principiante')
         user_interests_json = request.POST.get('user_interests', '[]')
+        
         # Validar datos requeridos
         if not user_prompt:
-            return JsonResponse({
-                'error': 'El prompt es requerido'
-            }, status=400)
+            messages.error(request, 'El tema del curso es requerido')
+            return redirect('users:dashboard')
         if len(user_prompt) < 10:
-            return JsonResponse({
-                'error': 'El prompt debe tener al menos 10 caracteres'
-            }, status=400)
+            messages.error(request, 'El tema debe tener al menos 10 caracteres')
+            return redirect('users:dashboard')
+        
         # Parsear intereses
         try:
             user_interests = json.loads(user_interests_json)
@@ -46,6 +58,7 @@ def simple_course_create(request):
                 user_interests = []
         except (json.JSONDecodeError, TypeError):
             user_interests = []
+        
         # Crear curso con status inicial
         course = Course.objects.create(
             user=request.user,
@@ -55,8 +68,74 @@ def simple_course_create(request):
             status=Course.StatusChoices.GENERATING_METADATA,
             language='es'  # Por defecto español
         )
+        
+        # Incrementar contador de cursos del usuario
+        user.increment_course_count()
+        
         # Iniciar tarea asíncrona de generación de metadata (Fase 1)
         generate_course_metadata.delay(str(course.id))
+        
+        messages.success(request, f'¡Curso "{user_prompt}" creado exitosamente! Estamos generando el contenido con IA...')
+        return redirect('course_view', course_id=course.id)
+    
+    # Si es GET, redirigir al dashboard
+    return redirect('users:dashboard')
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def simple_course_create(request):
+    """Vista para crear cursos reales usando la API de Claude"""
+    try:
+        # Verificar límites de suscripción
+        user = request.user
+        if not user.can_create_course():
+            return JsonResponse({
+                'error': 'Has alcanzado el límite de cursos para tu plan actual',
+                'show_upgrade': True,
+                'current_plan': user.get_plan_price_info()
+            }, status=403)
+        
+        # Obtener datos del formulario
+        user_prompt = request.POST.get('user_prompt', '').strip()
+        user_level = request.POST.get('user_level', 'principiante')
+        user_interests_json = request.POST.get('user_interests', '[]')
+        
+        # Validar datos requeridos
+        if not user_prompt:
+            return JsonResponse({
+                'error': 'El prompt es requerido'
+            }, status=400)
+        if len(user_prompt) < 10:
+            return JsonResponse({
+                'error': 'El prompt debe tener al menos 10 caracteres'
+            }, status=400)
+        
+        # Parsear intereses
+        try:
+            user_interests = json.loads(user_interests_json)
+            if not isinstance(user_interests, list):
+                user_interests = []
+        except (json.JSONDecodeError, TypeError):
+            user_interests = []
+        
+        # Crear curso con status inicial
+        course = Course.objects.create(
+            user=request.user,
+            user_prompt=user_prompt,
+            user_level=user_level,
+            user_interests=user_interests,
+            status=Course.StatusChoices.GENERATING_METADATA,
+            language='es'  # Por defecto español
+        )
+        
+        # Incrementar contador de cursos del usuario
+        user.increment_course_count()
+        
+        # Iniciar tarea asíncrona de generación de metadata (Fase 1)
+        generate_course_metadata.delay(str(course.id))
+        
         # Respuesta inmediata con datos básicos
         return JsonResponse({
             'id': str(course.id),
@@ -64,6 +143,7 @@ def simple_course_create(request):
             'title': course.title or None,
             'message': 'Curso creado exitosamente. Generando metadata con IA...'
         }, status=201)
+        
     except Exception as e:
         return JsonResponse({
             'error': f'Error interno del servidor: {str(e)}'
@@ -113,9 +193,29 @@ def course_metadata(request, course_id):
 
 @login_required
 def module_view(request, course_id, module_id):
-    """Vista de módulo individual"""
+    """Vista de módulo individual con lógica de paywall"""
     course = get_object_or_404(Course, id=course_id, user=request.user)
     module = get_object_or_404(Module, course=course, module_id=module_id)
+    
+    # PAYWALL LOGIC: Verificar acceso según suscripción
+    user = request.user
+    is_free_user = user.membership == user.MembershipChoices.FREE
+    
+    # Para usuarios gratuitos, solo permitir acceso al primer módulo
+    if is_free_user and module.module_order > 1:
+        # Redirigir con parámetro para mostrar el modal de precios
+        context = {
+            'course': course,
+            'blocked_module': module,
+            'show_paywall': True,
+            'current_plan': user.get_plan_price_info(),
+            'breadcrumbs': [
+                (reverse('users:dashboard'), 'Dashboard'),
+                (reverse('course_view', kwargs={'course_id': course.id}), course.title),
+                (None, f"Módulo {module.module_order} (Bloqueado)"),
+            ],
+        }
+        return render(request, 'module_blocked.html', context)
     
     # AUTO-GENERACIÓN: Si el módulo no tiene contenido, activar generación (fallback)
     # Nota: Con el nuevo flujo automático, esto solo debería ejecutarse como respaldo
@@ -141,6 +241,11 @@ def module_view(request, course_id, module_id):
         module_order__gt=module.module_order
     ).order_by('module_order').first()
     
+    # Para usuarios gratuitos, marcar el siguiente módulo como bloqueado si existe
+    next_module_blocked = False
+    if is_free_user and next_module:
+        next_module_blocked = True
+    
     # Obtener progreso del usuario si está autenticado
     user_progress = None
     if request.user.is_authenticated:
@@ -159,7 +264,10 @@ def module_view(request, course_id, module_id):
         'module': module,
         'previous_module': previous_module,
         'next_module': next_module,
+        'next_module_blocked': next_module_blocked,
         'user_progress': user_progress,
+        'show_paywall_preview': is_free_user and module.module_order == 1,  # Mostrar preview en el primer módulo
+        'current_plan': user.get_plan_price_info(),
         'breadcrumbs': [
             (reverse('users:dashboard'), 'Dashboard'),
             (reverse('course_view', kwargs={'course_id': course.id}), course.title),

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Cursia - Plataforma Inteligente de Cursos{% endblock %}</title>
+    <title>{% block title %}Cursia - Plataforma de Aprendizaje Inteligente{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -28,23 +28,25 @@
     <!-- Estilos personalizados de Cursia -->
     <style>
         :root {
-            --primary-color: #38b6ff;
-            --primary-hover: #2ba3eb;
-            --primary-light: #e7f7ff;
-            --secondary-color: #64748b;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --bg-light: #f8fafc;
-            --border-light: #e2e8f0;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-light: #eff6ff;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --bg-light: #f9fafb;
+            --border-light: #e5e7eb;
+            --white: #ffffff;
+            --black: #000000;
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             font-weight: 400;
-            background-color: white;
+            background-color: var(--white);
             color: var(--text-dark);
             line-height: 1.6;
         }
@@ -54,20 +56,25 @@
         .navbar-brand,
         .btn,
         .card-title {
-            font-weight: 700; /* Inter Bold */
+            font-weight: 600;
         }
         
         .navbar-brand {
-            font-weight: 800; /* Extra Bold para el logo */
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
+            font-weight: 700;
+            font-size: 1.75rem;
+            color: var(--black) !important;
+        }
+        
+        .navbar-brand .brand-highlight {
+            color: var(--primary-color);
         }
         
         /* Navbar */
         .navbar {
-            background-color: white !important;
+            background-color: var(--white) !important;
             border-bottom: 1px solid var(--border-light);
             padding: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
         .navbar-nav .nav-link {
@@ -95,7 +102,7 @@
             background-color: var(--primary-hover);
             border-color: var(--primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(56, 182, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
         .btn-outline-primary {
@@ -112,12 +119,27 @@
             transform: translateY(-1px);
         }
         
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #1e3a8a;
+            border-color: #1e3a8a;
+            transform: translateY(-1px);
+        }
+        
         /* Cards */
         .card {
-            border: none;
+            border: 1px solid var(--border-light);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             border-radius: 12px;
             transition: all 0.3s ease;
+            background: var(--white);
         }
         
         .card:hover {
@@ -127,12 +149,12 @@
         
         .course-card {
             border: 1px solid var(--border-light);
-            background: white;
+            background: var(--white);
         }
         
         .course-card:hover {
             border-color: var(--primary-color);
-            box-shadow: 0 8px 25px rgba(56, 182, 255, 0.15);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
         }
         
         /* Badges y status */
@@ -145,22 +167,22 @@
         
         .badge-generating {
             background-color: var(--warning-color);
-            color: white;
+            color: var(--white);
         }
         
         .badge-ready {
             background-color: var(--primary-color);
-            color: white;
+            color: var(--white);
         }
         
         .badge-complete {
             background-color: var(--success-color);
-            color: white;
+            color: var(--white);
         }
         
         .badge-failed {
             background-color: var(--danger-color);
-            color: white;
+            color: var(--white);
         }
         
         /* Progress bars */
@@ -186,7 +208,7 @@
         
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(56, 182, 255, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
         }
         
         .form-label {
@@ -220,11 +242,11 @@
         /* Containers y layout */
         .main-container {
             min-height: calc(100vh - 76px);
-            background: white;
+            background: var(--white);
         }
         
         .hero-section {
-            background: linear-gradient(135deg, var(--primary-light) 0%, white 100%);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--white) 100%);
             padding: 4rem 0;
         }
         
@@ -299,7 +321,7 @@
             max-width: none;
             margin: 0 auto;
             padding: 0;
-            background: white;
+            background: var(--white);
         }
         
         .markdown-body pre {
@@ -365,7 +387,7 @@
         
         /* Dashboard specific styles */
         .stats-card {
-            background: white;
+            background: var(--white);
             border: 1px solid var(--border-light);
             border-radius: 12px;
             padding: 1.5rem;
@@ -392,6 +414,37 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+        
+        /* Plan cards */
+        .plan-card {
+            border: 2px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+        
+        .plan-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.15);
+        }
+        
+        .plan-card.featured {
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .plan-card.featured::before {
+            content: "Recomendado";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
     </style>
     
     <!-- animate.css CDN -->
@@ -404,8 +457,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'users:dashboard' %}{% else %}{% url 'users:home' %}{% endif %}">
-                <i class="fas fa-graduation-cap me-2"></i>
-                Cursia
+                <span>Curs</span><span class="brand-highlight">ia</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -417,7 +469,7 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'users:dashboard' %}">
-                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                Dashboard
                             </a>
                         </li>
                     {% endif %}
@@ -427,16 +479,15 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>
                                 {{ user.first_name|default:user.username }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{% url 'users:profile' %}">
-                                    <i class="fas fa-user me-1"></i>Mi Perfil
+                                    Mi Perfil
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'users:logout' %}">
-                                    <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                                    Cerrar Sesión
                                 </a></li>
                             </ul>
                         </li>
@@ -458,7 +509,6 @@
         <div class="container mt-3">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>

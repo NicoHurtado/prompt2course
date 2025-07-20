@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+
+{% block title %}Proceso de Pago - Cursia{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold mb-3">Completar Suscripción</h1>
+                <p class="text-muted">Estás a un paso de desbloquear todo el contenido de Cursia</p>
+            </div>
+
+            <!-- Plan Summary -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="fw-bold mb-2">Plan {{ selected_plan|title }}</h5>
+                            <p class="text-muted mb-0">
+                                {% if selected_plan == 'aprendiz' %}
+                                    5 cursos por mes • Claude 3.5 Sonnet • Diplomas
+                                {% elif selected_plan == 'experto' %}
+                                    10 cursos por mes • IA Avanzada • Podcast personalizado
+                                {% elif selected_plan == 'familiar' %}
+                                    25 cursos por mes • Múltiples perfiles • Todo incluido
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="plan-price">
+                                <span class="price">
+                                    {% if selected_plan == 'aprendiz' %}
+                                        $29.900
+                                    {% elif selected_plan == 'experto' %}
+                                        $49.900
+                                    {% elif selected_plan == 'familiar' %}
+                                        $69.900
+                                    {% endif %}
+                                </span>
+                                <span class="period">/mes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Información de Pago
+                    </h5>
+
+                    <form id="paymentForm">
+                        {% csrf_token %}
+                        <!-- Payment Method Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Método de Pago</label>
+                            <div class="payment-methods">
+                                <div class="payment-method">
+                                    <input type="radio" class="btn-check" name="payment_method" id="credit_card" value="credit_card" checked>
+                                    <label class="btn btn-outline-primary w-100" for="credit_card">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        Tarjeta de Crédito/Débito
+                                    </label>
+                                </div>
+                                <div class="payment-method">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pse" value="pse">
+                                    <label class="btn btn-outline-primary w-100" for="pse">
+                                        <i class="fas fa-university me-2"></i>
+                                        PSE
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Credit Card Form -->
+                        <div id="creditCardForm">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="cardNumber" class="form-label">Número de Tarjeta</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-credit-card"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="expiryDate" class="form-label">Fecha de Vencimiento</label>
+                                    <input type="text" class="form-control" id="expiryDate" placeholder="MM/AA" maxlength="5">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123" maxlength="4">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="cardholderName" class="form-label">Nombre del Titular</label>
+                                    <input type="text" class="form-control" id="cardholderName" placeholder="Como aparece en la tarjeta">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PSE Form (Hidden by default) -->
+                        <div id="pseForm" style="display: none;">
+                            <div class="mb-3">
+                                <label for="bankSelect" class="form-label">Seleccionar Banco</label>
+                                <select class="form-select" id="bankSelect">
+                                    <option value="">Selecciona tu banco</option>
+                                    <option value="bancolombia">Bancolombia</option>
+                                    <option value="banco_bogota">Banco de Bogotá</option>
+                                    <option value="banco_popular">Banco Popular</option>
+                                    <option value="davivienda">Davivienda</option>
+                                    <option value="banco_occidente">Banco de Occidente</option>
+                                    <option value="colpatria">Colpatria</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Billing Information -->
+                        <div class="billing-info mt-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Información de Facturación
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="billingName" class="form-label">Nombre Completo</label>
+                                    <input type="text" class="form-control" id="billingName" value="{{ user.first_name }} {{ user.last_name }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="billingEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="billingEmail" value="{{ user.email }}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="billingAddress" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="billingAddress" placeholder="Calle, número, apartamento">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="billingCity" class="form-label">Ciudad</label>
+                                    <input type="text" class="form-control" id="billingCity" placeholder="Bogotá">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="billingZip" class="form-label">Código Postal</label>
+                                    <input type="text" class="form-control" id="billingZip" placeholder="110111">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                            <label class="form-check-label" for="termsCheck">
+                                Acepto los <a href="#" class="text-decoration-none">Términos y Condiciones</a> y la <a href="#" class="text-decoration-none">Política de Privacidad</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="payButton">
+                                <i class="fas fa-lock me-2"></i>
+                                Pagar de Forma Segura
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Badges -->
+            <div class="text-center mt-4">
+                <div class="security-badges">
+                    <span class="badge bg-light text-dark me-2">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        SSL Seguro
+                    </span>
+                    <span class="badge bg-light text-dark me-2">
+                        <i class="fas fa-lock me-1"></i>
+                        Pago Encriptado
+                    </span>
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-undo me-1"></i>
+                        Garantía 30 días
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="processing-animation mb-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Procesando...</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-3">Procesando Pago</h5>
+                <p class="text-muted mb-0">Por favor, no cierres esta ventana...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="success-animation mb-4">
+                    <div class="checkmark">
+                        <div class="checkmark-stem"></div>
+                        <div class="checkmark-kick"></div>
+                    </div>
+                </div>
+                <h4 class="fw-bold text-success mb-3">¡Pago Exitoso!</h4>
+                <p class="text-muted mb-4">Tu suscripción ha sido activada. Ya puedes acceder a todo el contenido de Cursia.</p>
+                <button type="button" class="btn btn-success btn-lg" onclick="redirectToDashboard()">
+                    <i class="fas fa-rocket me-2"></i>
+                    ¡Empezar a Aprender!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.payment-method .btn {
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.payment-method .btn-check:checked + .btn {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.plan-price {
+    text-align: right;
+}
+
+.plan-price .price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.plan-price .period {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.form-control, .form-select {
+    border-radius: 12px;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.input-group-text {
+    border-radius: 0 12px 12px 0;
+    border: 2px solid var(--border-light);
+    border-left: none;
+}
+
+.input-group .form-control {
+    border-radius: 12px 0 0 12px;
+}
+
+.security-badges .badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* Success Animation */
+.success-animation {
+    display: flex;
+    justify-content: center;
+}
+
+.checkmark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 4;
+    stroke: #28a745;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #28a745;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+    position: relative;
+    margin: 0 auto;
+}
+
+.checkmark-stem {
+    position: absolute;
+    width: 3px;
+    height: 30px;
+    background-color: #28a745;
+    left: 25px;
+    top: 15px;
+    transform: rotate(45deg);
+    animation: checkmark-stem 0.3s ease-out 0.9s both;
+}
+
+.checkmark-kick {
+    position: absolute;
+    width: 15px;
+    height: 3px;
+    background-color: #28a745;
+    left: 10px;
+    top: 35px;
+    transform: rotate(45deg);
+    animation: checkmark-kick 0.3s ease-out 1.2s both;
+}
+
+@keyframes checkmark-stem {
+    0% { height: 0; }
+    100% { height: 30px; }
+}
+
+@keyframes checkmark-kick {
+    0% { width: 0; }
+    100% { width: 15px; }
+}
+
+@keyframes fill {
+    100% { box-shadow: inset 0px 0px 0px 30px #28a745; }
+}
+
+@keyframes scale {
+    0%, 100% { transform: none; }
+    50% { transform: scale3d(1.1, 1.1, 1); }
+}
+</style>
+
+<script>
+// Card number formatting
+document.getElementById('cardNumber').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+    e.target.value = formattedValue;
+});
+
+// Expiry date formatting
+document.getElementById('expiryDate').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    e.target.value = value;
+});
+
+// CVV formatting
+document.getElementById('cvv').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '');
+});
+
+// Payment method toggle
+document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const creditCardForm = document.getElementById('creditCardForm');
+        const pseForm = document.getElementById('pseForm');
+        
+        if (this.value === 'credit_card') {
+            creditCardForm.style.display = 'block';
+            pseForm.style.display = 'none';
+        } else {
+            creditCardForm.style.display = 'none';
+            pseForm.style.display = 'block';
+        }
+    });
+});
+
+// Form submission
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const formData = new FormData(e.target);
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    const plan = '{{ selected_plan }}';
+    
+    // Show processing modal
+    const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+    processingModal.show();
+    
+    // Send payment data to backend
+    fetch('{% url "users:process_payment" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            plan: plan,
+            payment_method: paymentMethod
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        processingModal.hide();
+        
+        if (data.success) {
+            // Show success modal
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        processingModal.hide();
+        console.error('Error:', error);
+        alert('Error al procesar el pago. Intenta de nuevo.');
+    });
+});
+
+function redirectToDashboard() {
+    window.location.href = '{% url "users:dashboard" %}';
+}
+</script>
+{% endblock %} 

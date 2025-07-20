@@ -16,6 +16,55 @@
 {% endblock %}
 
 {% block content %}
+<!-- Loading Overlay for Generating Courses -->
+{% if course.status == 'generating_metadata' or course.status == 'generating_modules_metadata' or course.status == 'generating_module_1' %}
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="loading-animation">
+            <div class="ai-brain">
+                <div class="brain-pulse"></div>
+                <i class="fas fa-brain"></i>
+            </div>
+        </div>
+        <h3 class="loading-title">Generando tu curso con IA</h3>
+        <p class="loading-subtitle" id="loadingMessage">
+            {% if course.status == 'generating_metadata' %}
+                Analizando tu tema y creando la estructura del curso...
+            {% elif course.status == 'generating_modules_metadata' %}
+                Diseñando los módulos y objetivos de aprendizaje...
+            {% elif course.status == 'generating_module_1' %}
+                Creando el contenido del primer módulo...
+            {% endif %}
+        </p>
+        <div class="loading-progress">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step {% if course.status == 'generating_metadata' %}active{% elif course.status == 'generating_modules_metadata' or course.status == 'generating_module_1' %}completed{% endif %}">
+                    <div class="step-icon">1</div>
+                    <span>Metadata</span>
+                </div>
+                <div class="step {% if course.status == 'generating_modules_metadata' %}active{% elif course.status == 'generating_module_1' %}completed{% endif %}">
+                    <div class="step-icon">2</div>
+                    <span>Estructura</span>
+                </div>
+                <div class="step {% if course.status == 'generating_module_1' %}active{% endif %}">
+                    <div class="step-icon">3</div>
+                    <span>Contenido</span>
+                </div>
+            </div>
+        </div>
+        <div class="loading-tips">
+            <div class="tip-card">
+                <i class="fas fa-lightbulb"></i>
+                <span>Mientras tanto, puedes explorar otros cursos en tu dashboard</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <!-- Course Sidebar -->
     <div class="col-lg-3 mb-4">
@@ -24,14 +73,14 @@
                 <h6 class="text-muted mb-2">Progreso del Curso</h6>
                 {% if user_progress %}
                 <div class="progress mb-2">
-                    <div class="progress-bar bg-success" role="progressbar" 
+                    <div class="progress-bar bg-success" role="progress-bar" 
                          style="width: {{ user_progress.get_completion_percentage }}%">
                     </div>
                 </div>
                 <small class="text-muted">{{ user_progress.get_completion_percentage }}% completado</small>
                 {% else %}
                 <div class="progress mb-2">
-                    <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%"></div>
+                    <div class="progress-bar bg-secondary" role="progress-bar" style="width: 0%"></div>
                 </div>
                 <small class="text-muted">0% completado</small>
                 {% endif %}
@@ -52,7 +101,7 @@
                 </div>
                 <div class="mb-2">
                     <small class="text-muted">Estado:</small><br>
-                    <span class="badge bg-primary">{{ course.get_status_display }}</span>
+                    <span class="badge bg-primary" id="courseStatusBadge">{{ course.get_status_display }}</span>
                 </div>
                 <div>
                     <small class="text-muted">Tamaño:</small><br>
@@ -122,7 +171,7 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <h1 class="card-title h2 mb-2">{{ course.title }}</h1>
-                        <span class="badge bg-primary status-badge">{{ course.get_status_display }}</span>
+                        <span class="badge bg-primary status-badge" id="mainStatusBadge">{{ course.get_status_display }}</span>
                         {% if course.status == 'complete' %}
                         <span class="badge bg-success ms-2">
                             <i class="fas fa-check me-1"></i>Completado
@@ -151,7 +200,7 @@
             </div>
             <div class="card-body">
                 <div class="chunk-content mb-4">
-                    {{ course.introduction|markdown }}
+                    {{ course.introduction|markdownify }}
                 </div>
                 
                 <!-- Botón Reproduce Intro -->
@@ -210,9 +259,7 @@
         </div>
         {% endif %}
 
-
-
-                <!-- Course Modules -->
+        <!-- Course Modules -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">
@@ -221,7 +268,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="modules-container">
+                <div class="modules-container" id="modulesContainer">
                     {% if course.modules.all %}
                         <!-- Mostrar módulos completos cuando están disponibles -->
                         {% for module in course.modules.all %}
@@ -258,12 +305,12 @@
                                         {% if module_chunks %}
                                             {% with total_expected=module_chunks.0.total_chunks %}
                                                 <div class="progress" style="height: 6px;">
-                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio module_chunks|length total_expected 100 %}%;"></div>
+                                                    <div class="progress-bar bg-primary" role="progress-bar" style="width: {% widthratio module_chunks|length total_expected 100 %}%;"></div>
                                                 </div>
                                             {% endwith %}
                                         {% else %}
                                             <div class="progress" style="height: 6px;">
-                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%;"></div>
+                                                <div class="progress-bar bg-secondary" role="progress-bar" style="width: 0%;"></div>
                                             </div>
                                         {% endif %}
                                     {% endwith %}
@@ -401,277 +448,180 @@
             </div>
         </div>
         {% endif %}
+    </div>
+</div>
 
-        <!-- Topics -->
-        {% if course.topics %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-tags me-2"></i>
-                    Lo que Aprenderás
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for topic in course.topics %}
-                    <div class="col-md-6 col-lg-4 mb-2">
-                        <span class="badge bg-light text-dark border">{{ topic }}</span>
+<!-- Success Notification Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="success-animation mb-4">
+                    <div class="checkmark">
+                        <div class="checkmark-stem"></div>
+                        <div class="checkmark-kick"></div>
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Course Status & Actions -->
-        <div class="card">
-            <div class="card-body text-center">
-                {% if course.status == 'complete' %}
-                    <h5 class="text-success mb-3">
-                        <i class="fas fa-check-circle me-2"></i>
-                        ¡Curso Completamente Generado!
-                    </h5>
-                    <p class="text-muted">Todos los módulos están listos para ser estudiados.</p>
-                    {% if user_progress %}
-                        {% if user_progress.current_module %}
-                        <a href="{% url 'module_view' course_id=course.id module_id=user_progress.current_module.module_id %}" 
-                           class="btn btn-primary btn-lg me-3">
-                            <i class="fas fa-play me-2"></i>
-                            Continuar Estudiando
-                        </a>
-                        {% else %}
-                        <a href="{% url 'module_view' course_id=course.id module_id='modulo_1' %}" 
-                           class="btn btn-success btn-lg me-3">
-                            <i class="fas fa-play me-2"></i>
-                            Comenzar Curso
-                        </a>
-                        {% endif %}
-                    {% else %}
-                    <a href="{% url 'module_view' course_id=course.id module_id='modulo_1' %}" 
-                       class="btn btn-success btn-lg me-3">
-                        <i class="fas fa-play me-2"></i>
-                        Comenzar Curso
-                    </a>
-                    {% endif %}
-                {% elif course.status == 'ready' %}
-                    <h5 class="text-primary mb-3">
-                        <i class="fas fa-rocket me-2"></i>
-                        ¡Primer Módulo Listo!
-                    </h5>
-                    <p class="text-muted">Puedes comenzar a estudiar mientras generamos el resto del contenido.</p>
-                    <a href="{% url 'module_view' course_id=course.id module_id='modulo_1' %}" 
-                       class="btn btn-primary btn-lg me-3">
-                        <i class="fas fa-play me-2"></i>
-                        Comenzar Módulo 1
-                    </a>
-                    
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-clock me-1"></i>
-                            Los módulos restantes se están generando en segundo plano
-                        </small>
-                    </div>
-                {% elif course.status == 'generating_remaining' %}
-                    <div class="d-flex align-items-center justify-content-center mb-3">
-                        <div class="spinner-border text-primary me-3" role="status">
-                            <span class="visually-hidden">Generando...</span>
-                        </div>
-                        <div>
-                            <h5 class="mb-1">Generando Módulos Restantes</h5>
-                            <small class="text-muted">El primer módulo ya está disponible</small>
-                        </div>
-                    </div>
-                    <a href="{% url 'module_view' course_id=course.id module_id='modulo_1' %}" 
-                       class="btn btn-primary btn-lg">
-                        <i class="fas fa-play me-2"></i>
-                        Estudiar Mientras Generamos
-                    </a>
-                {% elif course.status == 'metadata_ready' or course.status == 'generating_module_1' %}
-                    <div class="alert alert-info mb-4">
-                        <h5 class="alert-heading">
-                            <i class="fas fa-info-circle me-2"></i>
-                            ¡Estructura del Curso Lista!
-                        </h5>
-                        <p class="mb-0">
-                            Ya puedes explorar la estructura completa del curso. 
-                            El contenido del primer módulo se está generando en background.
-                        </p>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-center mb-3">
-                        <div class="spinner-border text-primary me-3" role="status">
-                            <span class="visually-hidden">Generando...</span>
-                        </div>
-                        <div>
-                            <h5 class="mb-1">
-                                {% if course.status == 'metadata_ready' %}
-                                    Iniciando Generación de Contenido
-                                {% else %}
-                                    Generando Primer Módulo
-                                {% endif %}
-                            </h5>
-                            <small class="text-muted">Puedes explorar la estructura mientras esperamos</small>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-muted mb-3">
-                            <i class="fas fa-lightbulb me-1"></i>
-                            Mientras tanto, puedes revisar la estructura del curso, prerrequisitos y temas que aprenderás
-                        </p>
-                    </div>
-                {% else %}
-                    <div class="d-flex align-items-center justify-content-center">
-                        <div class="spinner-border text-primary me-3" role="status">
-                            <span class="visually-hidden">Generando...</span>
-                        </div>
-                        <div>
-                            <h5 class="mb-1">{{ course.get_status_display }}</h5>
-                            <small class="text-muted">Tu curso se está generando, por favor espera...</small>
-                        </div>
-                    </div>
-                {% endif %}
-                
-                <div class="mt-4">
-                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>
-                        Volver al Dashboard
-                    </a>
-                </div>
+                <h4 class="fw-bold text-success mb-3">¡Curso Listo!</h4>
+                <p class="text-muted mb-4">Tu curso ha sido generado exitosamente. Ya puedes empezar a aprender.</p>
+                <button type="button" class="btn btn-success btn-lg" data-bs-dismiss="modal">
+                    <i class="fas fa-rocket me-2"></i>
+                    ¡Empezar a Aprender!
+                </button>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-// Variables para el simulador de audio
-let audioPlaying = false;
-let audioProgress = 0;
-let audioInterval;
+// Course status polling
+let pollingInterval;
+const courseId = '{{ course.id }}';
+const currentStatus = '{{ course.status }}';
 
-// Polling automático para estados en progreso
-document.addEventListener('DOMContentLoaded', function() {
-    const courseStatus = '{{ course.status }}';
-    const courseId = '{{ course.id }}';
-    
-    // Solo hacer polling si el curso está en estado de generación
-    if (courseStatus === 'metadata_ready' || courseStatus === 'generating_module_1' || courseStatus === 'generating_remaining') {
-        startCoursePolling(courseId);
-    }
-});
-
-function startCoursePolling(courseId) {
-    const pollInterval = setInterval(function() {
-        fetch(`/course/${courseId}/status/`)
-            .then(response => response.json())
-            .then(data => {
-                // Si el estado cambió a listo o completo, recargar la página
-                if (data.status === 'ready' || data.status === 'complete') {
-                    clearInterval(pollInterval);
-                    location.reload();
-                }
-                
-                // Si falló, mostrar error
-                if (data.status === 'failed') {
-                    clearInterval(pollInterval);
-                    showCourseError();
-                }
-            })
-            .catch(error => {
-                console.error('Error polling course status:', error);
-                clearInterval(pollInterval);
-            });
-    }, 5000); // Poll cada 5 segundos
+// Start polling if course is generating
+if (['generating_metadata', 'generating_modules_metadata', 'generating_module_1'].includes(currentStatus)) {
+    startPolling();
 }
 
-function showCourseError() {
-    const statusContainer = document.querySelector('.card:last-child .card-body');
-    if (statusContainer) {
-        statusContainer.innerHTML = `
-            <div class="alert alert-danger">
-                <h5 class="alert-heading">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Error en la Generación
-                </h5>
-                <p>Hubo un problema generando el contenido del curso. Por favor, intenta crear un nuevo curso.</p>
-                <a href="/" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>
-                    Crear Nuevo Curso
-                </a>
-            </div>
-        `;
+function startPolling() {
+    pollingInterval = setInterval(checkCourseStatus, 3000); // Check every 3 seconds
+}
+
+function checkCourseStatus() {
+    fetch(`/course/${courseId}/status/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== currentStatus) {
+                // Status changed, reload page to show new content
+                showSuccessNotification();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking course status:', error);
+        });
+}
+
+function showSuccessNotification() {
+    // Stop polling
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    
+    // Hide loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 500);
+    }
+    
+    // Show success modal
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    successModal.show();
+}
+
+// Progress bar animation
+function animateProgressBar() {
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = progress + '%';
+            
+            if (progress >= 90) {
+                clearInterval(interval);
+            }
+        }, 2000);
+    }
+}
+
+// Start progress animation if loading overlay exists
+if (document.getElementById('loadingOverlay')) {
+    animateProgressBar();
+}
+
+// Audio simulator functions
+let audioSimulatorInterval;
+let currentTime = 0;
+const totalTime = 150; // 2:30 in seconds
+
+function toggleAudioSimulator() {
+    const btn = document.getElementById('play-pause-btn');
+    const icon = btn.querySelector('i');
+    const timeDisplay = document.getElementById('audio-time');
+    const progressBar = document.getElementById('audio-progress');
+    
+    if (icon.classList.contains('fa-play')) {
+        // Start playing
+        icon.classList.remove('fa-play');
+        icon.classList.add('fa-pause');
+        
+        audioSimulatorInterval = setInterval(() => {
+            currentTime++;
+            const minutes = Math.floor(currentTime / 60);
+            const seconds = currentTime % 60;
+            const totalMinutes = Math.floor(totalTime / 60);
+            const totalSeconds = totalTime % 60;
+            
+            timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / ${totalMinutes}:${totalSeconds.toString().padStart(2, '0')}`;
+            progressBar.style.width = (currentTime / totalTime * 100) + '%';
+            
+            if (currentTime >= totalTime) {
+                stopAudioSimulator();
+            }
+        }, 1000);
+    } else {
+        // Pause
+        stopAudioSimulator();
+    }
+}
+
+function stopAudioSimulator() {
+    const btn = document.getElementById('play-pause-btn');
+    const icon = btn.querySelector('i');
+    
+    icon.classList.remove('fa-pause');
+    icon.classList.add('fa-play');
+    
+    if (audioSimulatorInterval) {
+        clearInterval(audioSimulatorInterval);
     }
 }
 
 function playIntroAudio() {
     const container = document.getElementById('intro-audio-container');
     container.style.display = 'block';
-    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     
-    // Si hay un audio real, lo reproducimos
-    const realAudio = document.getElementById('intro-audio');
-    if (realAudio) {
-        realAudio.play();
-    } else {
-        // Si no hay audio real, iniciamos el simulador
-        startAudioSimulator();
-    }
-}
-
-function toggleAudioSimulator() {
-    if (audioPlaying) {
-        pauseAudioSimulator();
-    } else {
-        startAudioSimulator();
-    }
-}
-
-function startAudioSimulator() {
-    audioPlaying = true;
-    const playBtn = document.getElementById('play-pause-btn');
-    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    // Scroll to audio
+    container.scrollIntoView({ behavior: 'smooth' });
     
-    audioInterval = setInterval(function() {
-        audioProgress += 1;
-        const progressPercent = (audioProgress / 150) * 100; // 150 segundos = 2:30
-        
-        document.getElementById('audio-progress').style.width = progressPercent + '%';
-        
-        const minutes = Math.floor(audioProgress / 60);
-        const seconds = audioProgress % 60;
-        const currentTime = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-        document.getElementById('audio-time').textContent = currentTime + ' / 2:30';
-        
-        if (audioProgress >= 150) {
-            pauseAudioSimulator();
-            audioProgress = 0;
-        }
-    }, 1000);
-}
-
-function pauseAudioSimulator() {
-    audioPlaying = false;
-    const playBtn = document.getElementById('play-pause-btn');
-    playBtn.innerHTML = '<i class="fas fa-play"></i>';
-    
-    if (audioInterval) {
-        clearInterval(audioInterval);
+    // Auto-play if real audio exists
+    const audio = document.getElementById('intro-audio');
+    if (audio) {
+        setTimeout(() => {
+            audio.play().catch(e => console.log('Auto-play prevented:', e));
+        }, 500);
     }
 }
 
 function openPodcastPlayer() {
-    // Crear modal si no existe
-    let modal = document.getElementById('podcastModal');
-    if (!modal) {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('podcastModal')) {
         createPodcastModal();
-        modal = document.getElementById('podcastModal');
     }
     
-    // Mostrar modal
-    const bootstrapModal = new bootstrap.Modal(modal);
-    bootstrapModal.show();
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('podcastModal'));
+    modal.show();
     
-    // Auto-reproducir si hay audio disponible con manejo de errores mejorado
+    // Auto-play audio after modal shows
     setTimeout(() => {
         const audio = document.getElementById('podcastAudio');
         if (audio) {
@@ -817,6 +767,220 @@ function createPodcastModal() {
 
 {% block extra_css %}
 <style>
+    /* Loading Overlay Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.5s ease;
+    }
+
+    .loading-content {
+        text-align: center;
+        color: white;
+        max-width: 600px;
+        padding: 2rem;
+    }
+
+    .loading-animation {
+        margin-bottom: 2rem;
+    }
+
+    .ai-brain {
+        position: relative;
+        display: inline-block;
+        font-size: 4rem;
+        color: white;
+    }
+
+    .brain-pulse {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100px;
+        height: 100px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    .loading-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .loading-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+
+    .loading-progress {
+        margin-bottom: 2rem;
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: white;
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.5s ease;
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+
+    .step.active {
+        opacity: 1;
+    }
+
+    .step.completed {
+        opacity: 1;
+    }
+
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        transition: background 0.3s ease;
+    }
+
+    .step.active .step-icon {
+        background: white;
+        color: #667eea;
+    }
+
+    .step.completed .step-icon {
+        background: #28a745;
+        color: white;
+    }
+
+    .loading-tips {
+        margin-top: 2rem;
+    }
+
+    .tip-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .tip-card i {
+        font-size: 1.5rem;
+        color: #ffd700;
+    }
+
+    /* Success Modal Styles */
+    .success-animation {
+        display: flex;
+        justify-content: center;
+    }
+
+    .checkmark {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: block;
+        stroke-width: 4;
+        stroke: #28a745;
+        stroke-miterlimit: 10;
+        box-shadow: inset 0px 0px 0px #28a745;
+        animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .checkmark-stem {
+        position: absolute;
+        width: 3px;
+        height: 30px;
+        background-color: #28a745;
+        left: 25px;
+        top: 15px;
+        transform: rotate(45deg);
+        animation: checkmark-stem 0.3s ease-out 0.9s both;
+    }
+
+    .checkmark-kick {
+        position: absolute;
+        width: 15px;
+        height: 3px;
+        background-color: #28a745;
+        left: 10px;
+        top: 35px;
+        transform: rotate(45deg);
+        animation: checkmark-kick 0.3s ease-out 1.2s both;
+    }
+
+    @keyframes checkmark-stem {
+        0% { height: 0; }
+        100% { height: 30px; }
+    }
+
+    @keyframes checkmark-kick {
+        0% { width: 0; }
+        100% { width: 15px; }
+    }
+
+    @keyframes fill {
+        100% { box-shadow: inset 0px 0px 0px 30px #28a745; }
+    }
+
+    @keyframes scale {
+        0%, 100% { transform: none; }
+        50% { transform: scale3d(1.1, 1.1, 1); }
+    }
+
+    /* Existing Styles */
     .module-card {
         transition: all 0.2s;
         background-color: #fff;

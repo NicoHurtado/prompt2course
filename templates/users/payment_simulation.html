@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}Proceso de Pago - Cursia{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold mb-3">🔒 Proceso de Pago Seguro</h1>
+                <p class="text-muted">Completa tu suscripción para desbloquear todo el poder de Cursia</p>
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <i class="fas fa-shield-alt text-success me-2"></i>
+                    <span class="text-success">Conexión SSL Segura</span>
+                    <i class="fas fa-lock text-success ms-2"></i>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="card shadow-lg border-0" style="border-radius: 20px;">
+                <div class="card-header bg-primary text-white text-center" style="border-radius: 20px 20px 0 0;">
+                    <h4 class="mb-2">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Finalizar Suscripción
+                    </h4>
+                    <p class="mb-0" id="plan-title">Plan Professional - $79,900/mes</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Plan Summary -->
+                    <div class="plan-summary mb-4 p-3" style="background: #f8f9fa; border-radius: 10px;">
+                        <h6 class="fw-bold mb-2">📋 Resumen de tu plan:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>10 cursos por mes</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>IA Claude avanzada</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Videos y audios HD</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Soporte prioritario</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Analytics avanzados</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Plantillas premium</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="payment-method mb-4">
+                        <h6 class="fw-bold mb-3">💳 Método de Pago</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="payment-option">
+                                    <input type="radio" class="btn-check" name="payment-method" id="credit-card" value="credit-card" checked>
+                                    <label class="btn btn-outline-primary w-100 p-3" for="credit-card">
+                                        <i class="fas fa-credit-card fa-2x mb-2"></i><br>
+                                        <strong>Tarjeta de Crédito</strong><br>
+                                        <small>Visa, MasterCard</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="payment-option">
+                                    <input type="radio" class="btn-check" name="payment-method" id="debit-card" value="debit-card">
+                                    <label class="btn btn-outline-primary w-100 p-3" for="debit-card">
+                                        <i class="fas fa-money-check fa-2x mb-2"></i><br>
+                                        <strong>Tarjeta Débito</strong><br>
+                                        <small>Débito nacional</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="payment-option">
+                                    <input type="radio" class="btn-check" name="payment-method" id="pse" value="pse">
+                                    <label class="btn btn-outline-primary w-100 p-3" for="pse">
+                                        <i class="fas fa-university fa-2x mb-2"></i><br>
+                                        <strong>PSE</strong><br>
+                                        <small>Banco en línea</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form id="payment-form">
+                        <!-- Card Details -->
+                        <div id="card-details">
+                            <div class="row g-3 mb-3">
+                                <div class="col-12">
+                                    <label for="card-number" class="form-label">Número de Tarjeta</label>
+                                    <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="expiry" class="form-label">Vencimiento</label>
+                                    <input type="text" class="form-control" id="expiry" placeholder="MM/AA" maxlength="5">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123" maxlength="4">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="installments" class="form-label">Cuotas</label>
+                                    <select class="form-select" id="installments">
+                                        <option value="1">1 cuota</option>
+                                        <option value="3">3 cuotas</option>
+                                        <option value="6">6 cuotas</option>
+                                        <option value="12">12 cuotas</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Info -->
+                        <div class="billing-info mb-4">
+                            <h6 class="fw-bold mb-3">📋 Información de Facturación</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="billing-name" class="form-label">Nombre Completo</label>
+                                    <input type="text" class="form-control" id="billing-name" value="{{ user.get_full_name }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="billing-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="billing-email" value="{{ user.email }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="billing-phone" class="form-label">Teléfono</label>
+                                    <input type="tel" class="form-control" id="billing-phone" placeholder="+57 300 123 4567" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="billing-document" class="form-label">Documento de Identidad</label>
+                                    <input type="text" class="form-control" id="billing-document" placeholder="CC 12345678" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="accept-terms" required>
+                            <label class="form-check-label" for="accept-terms">
+                                Acepto los <a href="#" class="text-decoration-none">términos y condiciones</a> y 
+                                la <a href="#" class="text-decoration-none">política de privacidad</a>
+                            </label>
+                        </div>
+
+                        <!-- Payment Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg w-100 mb-3" id="pay-button">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                <span id="pay-text">Pagar Ahora - $79,900</span>
+                            </button>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-lock me-1"></i>
+                                Pago 100% seguro y encriptado
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="trust-badges mt-4 text-center">
+                <div class="row">
+                    <div class="col-md-3">
+                        <i class="fas fa-shield-alt text-success fa-2x mb-2"></i>
+                        <p><strong>SSL 256-bit</strong><br><small>Encriptación bancaria</small></p>
+                    </div>
+                    <div class="col-md-3">
+                        <i class="fas fa-undo text-success fa-2x mb-2"></i>
+                        <p><strong>30 días</strong><br><small>Garantía de reembolso</small></p>
+                    </div>
+                    <div class="col-md-3">
+                        <i class="fas fa-headset text-success fa-2x mb-2"></i>
+                        <p><strong>Soporte 24/7</strong><br><small>Siempre disponible</small></p>
+                    </div>
+                    <div class="col-md-3">
+                        <i class="fas fa-users text-success fa-2x mb-2"></i>
+                        <p><strong>12,000+</strong><br><small>Clientes satisfechos</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processing-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 15px;">
+            <div class="modal-body text-center p-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+                <h5 class="fw-bold mb-2">🔄 Procesando tu pago...</h5>
+                <p class="text-muted mb-0">No cierres esta ventana. Esto puede tomar unos segundos.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="success-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 15px;">
+            <div class="modal-body text-center p-5">
+                <i class="fas fa-check-circle text-success mb-3" style="font-size: 4rem;"></i>
+                <h4 class="fw-bold text-success mb-2">¡Pago Exitoso! 🎉</h4>
+                <p class="text-muted mb-4" id="success-message">Tu suscripción ha sido activada correctamente.</p>
+                <button class="btn btn-primary btn-lg" onclick="redirectToDashboard()">
+                    <i class="fas fa-home me-2"></i>
+                    Ir al Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize page with selected plan
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedPlan = urlParams.get('plan') || 'professional';
+    updatePlanInfo(selectedPlan);
+    
+    // Format card number input
+    document.getElementById('card-number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+        let formattedValue = value.replace(/(.{4})/g, '$1 ').trim();
+        if (formattedValue.length > 19) formattedValue = formattedValue.substr(0, 19);
+        e.target.value = formattedValue;
+    });
+    
+    // Format expiry input
+    document.getElementById('expiry').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    // CVV only numbers
+    document.getElementById('cvv').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+});
+
+function updatePlanInfo(plan) {
+    const planInfo = {
+        'starter': { name: 'Starter', price: 49900, originalPrice: 80000 },
+        'professional': { name: 'Professional', price: 79900, originalPrice: 150000 },
+        'premium': { name: 'Premium', price: 99000, originalPrice: 280000 }
+    };
+    
+    const info = planInfo[plan] || planInfo.professional;
+    const formattedPrice = new Intl.NumberFormat('es-CO', { 
+        style: 'currency', 
+        currency: 'COP', 
+        minimumFractionDigits: 0 
+    }).format(info.price);
+    
+    document.getElementById('plan-title').textContent = `Plan ${info.name} - ${formattedPrice}/mes`;
+    document.getElementById('pay-text').textContent = `Pagar Ahora - ${formattedPrice}`;
+}
+
+// Handle form submission
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validate form
+    if (!validateForm()) {
+        return;
+    }
+    
+    // Show processing modal
+    const processingModal = new bootstrap.Modal(document.getElementById('processing-modal'));
+    processingModal.show();
+    
+    // Get selected plan and payment method
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedPlan = urlParams.get('plan') || 'professional';
+    const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+    
+    // Simulate payment processing
+    fetch('{% url "users:process_payment" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            plan: selectedPlan,
+            payment_method: paymentMethod,
+            billing_info: {
+                name: document.getElementById('billing-name').value,
+                email: document.getElementById('billing-email').value,
+                phone: document.getElementById('billing-phone').value,
+                document: document.getElementById('billing-document').value
+            }
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        processingModal.hide();
+        
+        if (data.success) {
+            document.getElementById('success-message').textContent = data.message;
+            const successModal = new bootstrap.Modal(document.getElementById('success-modal'));
+            successModal.show();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        processingModal.hide();
+        alert('Error al procesar el pago. Por favor intenta de nuevo.');
+        console.error('Error:', error);
+    });
+});
+
+function validateForm() {
+    const requiredFields = ['billing-name', 'billing-email', 'billing-phone', 'billing-document'];
+    const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+    
+    if (paymentMethod === 'credit-card' || paymentMethod === 'debit-card') {
+        requiredFields.push('card-number', 'expiry', 'cvv');
+    }
+    
+    for (let fieldId of requiredFields) {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            field.focus();
+            alert('Por favor completa todos los campos requeridos.');
+            return false;
+        }
+    }
+    
+    if (!document.getElementById('accept-terms').checked) {
+        alert('Debes aceptar los términos y condiciones.');
+        return false;
+    }
+    
+    return true;
+}
+
+function redirectToDashboard() {
+    window.location.href = '{% url "users:dashboard" %}';
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %} 

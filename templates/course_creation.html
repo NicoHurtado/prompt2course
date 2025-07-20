@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Nuevo Curso - Cursia{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold mb-3">Crear Nuevo Curso</h1>
+                <p class="text-muted">Genera contenido educativo personalizado con IA</p>
+            </div>
+
+            <!-- Plan Info -->
+            {% if not can_create_more %}
+                <div class="alert alert-warning border-0" style="border-radius: 15px;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Límite de cursos alcanzado</h6>
+                            <p class="mb-0">Has usado todos los cursos de tu plan {{ current_plan.name }}. Actualiza tu plan para crear más cursos.</p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info border-0" style="border-radius: 15px;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-3 fs-4"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Plan {{ current_plan.name }}</h6>
+                            <p class="mb-0">Tienes <strong>{{ courses_remaining }}</strong> cursos disponibles este mes.</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Course Creation Form -->
+            {% if can_create_more %}
+                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <form method="post" action="{% url 'create_course_from_home' %}">
+                            {% csrf_token %}
+                            
+                            <!-- Topic Input -->
+                            <div class="mb-4">
+                                <label for="user_prompt" class="form-label fw-bold">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    ¿Qué quieres aprender?
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="user_prompt" 
+                                       name="user_prompt" 
+                                       placeholder="Ej: Machine Learning para principiantes, Diseño UX/UI, Marketing Digital..."
+                                       required
+                                       minlength="10">
+                                <div class="form-text">Describe el tema que quieres aprender. Mientras más específico, mejor será el curso.</div>
+                            </div>
+
+                            <!-- Level Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Tu nivel de experiencia
+                                </label>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="level-option-card">
+                                            <input type="radio" class="btn-check" name="user_level" id="level_beginner" value="principiante" checked>
+                                            <label class="btn btn-outline-primary w-100 h-100" for="level_beginner">
+                                                <div class="text-center p-3">
+                                                    <i class="fas fa-seedling fs-2 mb-2"></i>
+                                                    <h6>Principiante</h6>
+                                                    <small class="text-muted">Empezando desde cero</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="level-option-card">
+                                            <input type="radio" class="btn-check" name="user_level" id="level_intermediate" value="intermedio">
+                                            <label class="btn btn-outline-primary w-100 h-100" for="level_intermediate">
+                                                <div class="text-center p-3">
+                                                    <i class="fas fa-tree fs-2 mb-2"></i>
+                                                    <h6>Intermedio</h6>
+                                                    <small class="text-muted">Tengo conocimientos básicos</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="level-option-card">
+                                            <input type="radio" class="btn-check" name="user_level" id="level_advanced" value="avanzado">
+                                            <label class="btn btn-outline-primary w-100 h-100" for="level_advanced">
+                                                <div class="text-center p-3">
+                                                    <i class="fas fa-mountain fs-2 mb-2"></i>
+                                                    <h6>Avanzado</h6>
+                                                    <small class="text-muted">Quiero profundizar</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interests Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-heart me-2"></i>
+                                    Áreas de interés (opcional)
+                                </label>
+                                <div class="interests-grid">
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_tech" value="Tecnología">
+                                        <label class="btn btn-outline-secondary" for="interest_tech">
+                                            <i class="fas fa-laptop-code me-2"></i>
+                                            Tecnología
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_science" value="Ciencia">
+                                        <label class="btn btn-outline-secondary" for="interest_science">
+                                            <i class="fas fa-atom me-2"></i>
+                                            Ciencia
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_business" value="Negocios">
+                                        <label class="btn btn-outline-secondary" for="interest_business">
+                                            <i class="fas fa-briefcase me-2"></i>
+                                            Negocios
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_art" value="Arte">
+                                        <label class="btn btn-outline-secondary" for="interest_art">
+                                            <i class="fas fa-palette me-2"></i>
+                                            Arte
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_health" value="Salud">
+                                        <label class="btn btn-outline-secondary" for="interest_health">
+                                            <i class="fas fa-heartbeat me-2"></i>
+                                            Salud
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_sports" value="Deportes">
+                                        <label class="btn btn-outline-secondary" for="interest_sports">
+                                            <i class="fas fa-futbol me-2"></i>
+                                            Deportes
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_education" value="Educación">
+                                        <label class="btn btn-outline-secondary" for="interest_education">
+                                            <i class="fas fa-graduation-cap me-2"></i>
+                                            Educación
+                                        </label>
+                                    </div>
+                                    <div class="interest-checkbox">
+                                        <input type="checkbox" class="btn-check" name="interests" id="interest_marketing" value="Marketing">
+                                        <label class="btn btn-outline-secondary" for="interest_marketing">
+                                            <i class="fas fa-bullhorn me-2"></i>
+                                            Marketing
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="user_interests" id="user_interests" value="[]">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-magic me-2"></i>
+                                    Crear Curso con IA
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Back to Dashboard -->
+            <div class="text-center mt-4">
+                <a href="{% url 'users:dashboard' %}" class="text-muted text-decoration-none">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.level-option-card {
+    height: 100%;
+}
+
+.level-option-card .btn {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.level-option-card .btn-check:checked + .btn {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.interest-checkbox .btn {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.interest-checkbox .btn-check:checked + .btn {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.form-control-lg {
+    border-radius: 12px;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.form-control-lg:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+</style>
+
+<script>
+// Handle interests selection
+document.querySelectorAll('input[name="interests"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const selectedInterests = Array.from(document.querySelectorAll('input[name="interests"]:checked'))
+            .map(cb => cb.value);
+        document.getElementById('user_interests').value = JSON.stringify(selectedInterests);
+    });
+});
+</script>
+{% endblock %} 

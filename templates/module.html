@@ -187,7 +187,7 @@
                     <div class="card-body">
                         <!-- Chunk Content -->
                         <div class="chunk-content markdown-body mb-4">
-                            {{ chunk.content|markdown }}
+                            {{ chunk.content|markdownify }}
                         </div>
                     </div>
                 </div>
@@ -306,7 +306,7 @@
             </div>
             <div class="card-body">
                 <div class="chunk-content markdown-body">
-                    {{ module.summary|markdown }}
+                    {{ module.summary|markdownify }}
                 </div>
             </div>
         </div>
@@ -331,11 +331,18 @@
                             Ver Todos los Módulos
                         </a>
                         {% if next_module %}
-                        <a href="{% url 'module_view' course_id=course.id module_id=next_module.module_id %}" 
-                           class="btn btn-primary">
-                            Siguiente Módulo
-                            <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
+                            {% if next_module_blocked %}
+                                <button class="btn btn-warning" onclick="showUpgradeModal()" title="Necesitas actualizar tu plan para acceder a este módulo">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Siguiente Módulo (Premium)
+                                </button>
+                            {% else %}
+                                <a href="{% url 'module_view' course_id=course.id module_id=next_module.module_id %}" 
+                                   class="btn btn-primary">
+                                    Siguiente Módulo
+                                    <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -343,6 +350,51 @@
         </div>
     </div>
 </div>
+
+<!-- Paywall Preview for Free Users -->
+{% if show_paywall_preview %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="paywall-preview card border-warning" style="border-width: 2px; border-radius: 15px;">
+                <div class="card-header bg-warning text-dark text-center" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crown me-2"></i>
+                        ¡Felicitaciones! Completaste tu primer módulo gratis
+                    </h5>
+                </div>
+                <div class="card-body text-center p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold mb-2">🚀 ¿Listo para el siguiente nivel?</h6>
+                            <p class="mb-3">Desbloquea {{ course.modules.count|add:"-1" }} módulos más + contenido premium</p>
+                            <div class="d-flex justify-content-center align-items-center mb-3">
+                                <span class="badge bg-success me-2">Videos HD</span>
+                                <span class="badge bg-success me-2">Audios</span>
+                                <span class="badge bg-success me-2">PDFs</span>
+                                <span class="badge bg-success">Soporte VIP</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-warning btn-lg" onclick="showUpgradeModal()">
+                                <i class="fas fa-rocket me-2"></i>
+                                Ver Planes
+                            </button>
+                            <p class="mt-2 mb-0">
+                                <small class="text-muted">Desde $49,900/mes</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Include Pricing Modal -->
+{% include 'components/pricing_modal.html' %}
+
 {% endblock %}
 
 {% block extra_css %}
@@ -458,6 +510,12 @@
         setTimeout(() => {
             toast.remove();
         }, 3000);
+    }
+    
+    // Show upgrade modal function
+    function showUpgradeModal() {
+        const pricingModal = new bootstrap.Modal(document.getElementById('pricingModal'));
+        pricingModal.show();
     }
 </script>
 {% endblock %} 
