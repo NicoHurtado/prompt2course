@@ -131,8 +131,6 @@ dmypy.json
 *.pot
 *.pyc
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
 *.db
 
 # Media files (uploads)
