@@ -24,7 +24,7 @@ class User(AbstractUser):
     # Campos de facturación y límites
     subscription_start_date = models.DateTimeField(null=True, blank=True)
     subscription_end_date = models.DateTimeField(null=True, blank=True)
-    current_month_courses = models.IntegerField(default=0, help_text="Cursos creados en el mes actual")
+    current_month_courses = models.IntegerField(default=0, null=False, blank=False, help_text="Cursos creados en el mes actual")
     last_course_reset = models.DateField(auto_now_add=True, help_text="Última vez que se reinició el contador mensual")
     
     # Campos adicionales

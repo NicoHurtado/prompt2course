@@ -12,6 +12,9 @@ from datetime import timedelta
 import json
 from .forms import SignUpForm
 from courses.models import Course
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 def home_view(request):
@@ -66,12 +69,19 @@ def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
+            # Crear usuario manualmente
+            cleaned_data = form.cleaned_data
+            user = User.objects.create_user(
+                username=cleaned_data['username'],
+                email=cleaned_data['email'],
+                password=cleaned_data['password1'],
+                first_name=cleaned_data['first_name'],
+                last_name=cleaned_data['last_name'],
+                current_month_courses=0
+            )
             
             # Autenticar y hacer login automáticamente
-            user = authenticate(username=username, password=password)
+            user = authenticate(username=cleaned_data['username'], password=cleaned_data['password1'])
             if user is not None:
                 login(request, user)
                 messages.success(request, f'¡Cuenta creada exitosamente! Bienvenido a Cursia, {user.first_name or user.username}!')

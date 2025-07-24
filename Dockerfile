@@ -20,12 +20,18 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copiar el resto del código
 COPY . .
 
-# Crear carpetas necesarias
-RUN mkdir -p logs static
+# Crear carpetas necesarias y configurar permisos
+RUN mkdir -p logs static && \
+    touch db.sqlite3 && \
+    chmod 666 db.sqlite3 && \
+    chown -R www-data:www-data /app
 
 # Copiar los entrypoints
 COPY docker-entrypoint.sh /entrypoint.sh
 COPY celery-entrypoint.sh /app/celery-entrypoint.sh
 RUN chmod +x /entrypoint.sh /app/celery-entrypoint.sh
+
+# Cambiar al usuario www-data
+USER www-data
 
 ENTRYPOINT ["/entrypoint.sh"] 
