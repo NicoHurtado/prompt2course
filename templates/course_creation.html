@@ -2,191 +2,609 @@
 
 {% block title %}Crear Nuevo Curso - Cursia{% endblock %}
 
+{% block extra_css %}
+<!-- Google Fonts - Poppins -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* Typography moderna */
+.modern-typography {
+    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.creation-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 3rem 0;
+}
+
+.creation-card {
+    background: white;
+    border-radius: 24px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    padding: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.creation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, #667eea 100%);
+}
+
+.hero-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #667eea 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.125rem;
+    color: #718096;
+    margin-bottom: 3rem;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.highlight-text {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+}
+
+.selections-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.section-header-with-number {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.section-number {
+    width: 32px;
+    height: 32px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.section-title-modern {
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.section-description {
+    color: #718096;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    margin-top: 0;
+}
+
+.form-control-modern {
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    font-size: 1.1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    font-family: 'Poppins', sans-serif;
+    min-height: 80px;
+}
+
+.prompt-input {
+    font-size: 1.2rem;
+    padding: 2rem;
+    min-height: 120px;
+    resize: vertical;
+}
+
+.prompt-input::placeholder {
+    transition: opacity 0.3s ease;
+    color: #a0aec0;
+    font-weight: 400;
+}
+
+.form-control-modern:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.form-control-modern::placeholder {
+    color: #a0aec0;
+    font-weight: 400;
+}
+
+.form-text-modern {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 400;
+}
+
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.level-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.level-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.level-card.selected {
+    border-color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.level-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #667eea 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.level-card:hover .level-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.level-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.level-description {
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 400;
+}
+
+.interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.interest-tag {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.interest-tag:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.interest-tag.selected {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.interest-icon {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.submit-section {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.btn-create-cursia {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-create-cursia:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.btn-create-cursia:active {
+    transform: translateY(0);
+}
+
+.plan-info-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.plan-info-card i {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.plan-info-card.warning {
+    background: #fef3f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.plan-info-card.warning i {
+    color: #dc2626;
+}
+
+.plan-info-card.info {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    color: #0369a1;
+}
+
+.plan-info-card.info i {
+    color: #0369a1;
+}
+
+.back-link {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.back-link a {
+    color: #718096;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-link a:hover {
+    color: var(--primary-color);
+    transform: translateX(-2px);
+}
+
+/* Animaciones de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.creation-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.form-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.form-section:nth-child(2) { animation-delay: 0.1s; }
+.form-section:nth-child(3) { animation-delay: 0.2s; }
+.form-section:nth-child(4) { animation-delay: 0.3s; }
+
+/* Responsive */
+@media (min-width: 1200px) {
+    .form-section {
+        margin-bottom: 3rem;
+    }
+    
+    .selections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+    
+    .level-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .interests-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .selections-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .level-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+    
+    .interests-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .creation-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+        border-radius: 20px;
+        max-width: 95%;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .selections-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .level-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .interests-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .prompt-input {
+        font-size: 1rem;
+        padding: 1.5rem;
+        min-height: 100px;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Header -->
-            <div class="text-center mb-5">
-                <h1 class="fw-bold mb-3">Crear Nuevo Curso</h1>
-                <p class="text-muted">Genera contenido educativo personalizado con IA</p>
+<div class="creation-container modern-typography">
+    <div class="container">
+        <div class="creation-card">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <!-- Icon -->
+                <div class="hero-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h1 class="hero-title">Crear Nuevo Curso</h1>
+                <p class="hero-subtitle">
+                    Genera contenido educativo personalizado con IA que se adapte a tu nivel y 
+                    cree <span class="highlight-text">ejemplos interactivos y descripciones personalizadas</span> según tus gustos e intereses
+                </p>
             </div>
 
             <!-- Plan Info -->
             {% if not can_create_more %}
-                <div class="alert alert-warning border-0" style="border-radius: 15px;">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Límite de cursos alcanzado</h6>
-                            <p class="mb-0">Has usado todos los cursos de tu plan {{ current_plan.name }}. Actualiza tu plan para crear más cursos.</p>
-                        </div>
-                    </div>
+                <div class="plan-info-card warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Límite de cursos alcanzado - Has usado todos los cursos de tu plan {{ current_plan.name }}</span>
                 </div>
             {% else %}
-                <div class="alert alert-info border-0" style="border-radius: 15px;">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-info-circle me-3 fs-4"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Plan {{ current_plan.name }}</h6>
-                            <p class="mb-0">Tienes <strong>{{ courses_remaining }}</strong> cursos disponibles este mes.</p>
-                        </div>
-                    </div>
+                <div class="plan-info-card info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Plan {{ current_plan.name }} - Tienes <strong>{{ courses_remaining }}</strong> curso disponible este mes</span>
                 </div>
             {% endif %}
 
             <!-- Course Creation Form -->
             {% if can_create_more %}
-                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
-                    <div class="card-body p-5">
-                        <form method="post" action="{% url 'create_course_from_home' %}">
-                            {% csrf_token %}
-                            
-                            <!-- Topic Input -->
-                            <div class="mb-4">
-                                <label for="user_prompt" class="form-label fw-bold">
-                                    <i class="fas fa-lightbulb me-2"></i>
-                                    ¿Qué quieres aprender?
-                                </label>
-                                <input type="text" 
-                                       class="form-control form-control-lg" 
-                                       id="user_prompt" 
-                                       name="user_prompt" 
-                                       placeholder="Ej: Machine Learning para principiantes, Diseño UX/UI, Marketing Digital..."
-                                       required
-                                       minlength="10">
-                                <div class="form-text">Describe el tema que quieres aprender. Mientras más específico, mejor será el curso.</div>
-                            </div>
-
-                            <!-- Level Selection -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-chart-line me-2"></i>
-                                    Tu nivel de experiencia
-                                </label>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <div class="level-option-card">
-                                            <input type="radio" class="btn-check" name="user_level" id="level_beginner" value="principiante" checked>
-                                            <label class="btn btn-outline-primary w-100 h-100" for="level_beginner">
-                                                <div class="text-center p-3">
-                                                    <i class="fas fa-seedling fs-2 mb-2"></i>
-                                                    <h6>Principiante</h6>
-                                                    <small class="text-muted">Empezando desde cero</small>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="level-option-card">
-                                            <input type="radio" class="btn-check" name="user_level" id="level_intermediate" value="intermedio">
-                                            <label class="btn btn-outline-primary w-100 h-100" for="level_intermediate">
-                                                <div class="text-center p-3">
-                                                    <i class="fas fa-tree fs-2 mb-2"></i>
-                                                    <h6>Intermedio</h6>
-                                                    <small class="text-muted">Tengo conocimientos básicos</small>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="level-option-card">
-                                            <input type="radio" class="btn-check" name="user_level" id="level_advanced" value="avanzado">
-                                            <label class="btn btn-outline-primary w-100 h-100" for="level_advanced">
-                                                <div class="text-center p-3">
-                                                    <i class="fas fa-mountain fs-2 mb-2"></i>
-                                                    <h6>Avanzado</h6>
-                                                    <small class="text-muted">Quiero profundizar</small>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Interests Selection -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-heart me-2"></i>
-                                    Áreas de interés (opcional)
-                                </label>
-                                <div class="interests-grid">
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_tech" value="Tecnología">
-                                        <label class="btn btn-outline-secondary" for="interest_tech">
-                                            <i class="fas fa-laptop-code me-2"></i>
-                                            Tecnología
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_science" value="Ciencia">
-                                        <label class="btn btn-outline-secondary" for="interest_science">
-                                            <i class="fas fa-atom me-2"></i>
-                                            Ciencia
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_business" value="Negocios">
-                                        <label class="btn btn-outline-secondary" for="interest_business">
-                                            <i class="fas fa-briefcase me-2"></i>
-                                            Negocios
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_art" value="Arte">
-                                        <label class="btn btn-outline-secondary" for="interest_art">
-                                            <i class="fas fa-palette me-2"></i>
-                                            Arte
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_health" value="Salud">
-                                        <label class="btn btn-outline-secondary" for="interest_health">
-                                            <i class="fas fa-heartbeat me-2"></i>
-                                            Salud
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_sports" value="Deportes">
-                                        <label class="btn btn-outline-secondary" for="interest_sports">
-                                            <i class="fas fa-futbol me-2"></i>
-                                            Deportes
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_education" value="Educación">
-                                        <label class="btn btn-outline-secondary" for="interest_education">
-                                            <i class="fas fa-graduation-cap me-2"></i>
-                                            Educación
-                                        </label>
-                                    </div>
-                                    <div class="interest-checkbox">
-                                        <input type="checkbox" class="btn-check" name="interests" id="interest_marketing" value="Marketing">
-                                        <label class="btn btn-outline-secondary" for="interest_marketing">
-                                            <i class="fas fa-bullhorn me-2"></i>
-                                            Marketing
-                                        </label>
-                                    </div>
-                                </div>
-                                <input type="hidden" name="user_interests" id="user_interests" value="[]">
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-magic me-2"></i>
-                                    Crear Curso con IA
-                                </button>
-                            </div>
-                        </form>
+                <form method="post" action="{% url 'create_course_from_home' %}" id="courseForm">
+                    {% csrf_token %}
+                    
+                    <!-- Topic Input -->
+                    <div class="form-section">
+                        <div class="section-header-with-number">
+                            <div class="section-number">1</div>
+                            <h3 class="section-title-modern">¿Qué quieres aprender?</h3>
+                        </div>
+                        <textarea class="form-control-modern prompt-input w-100" 
+                                  id="user_prompt" 
+                                  name="user_prompt" 
+                                  placeholder="Machine Learning para principiantes..."
+                                  required
+                                  minlength="10"
+                                  rows="4"></textarea>
+                        <div class="form-text-modern">Describe el tema que quieres aprender. Mientras más específico, mejor será el curso.</div>
                     </div>
-                </div>
+
+                    <!-- Level and Interests Layout -->
+                    <div class="selections-grid">
+                        <!-- Level Selection -->
+                        <div class="form-section">
+                            <div class="section-header-with-number">
+                                <div class="section-number">2</div>
+                                <h3 class="section-title-modern">Tu nivel de experiencia</h3>
+                            </div>
+                            <div class="level-grid">
+                                <div class="level-card selected" data-level="principiante">
+                                    <div class="level-icon">
+                                        <i class="fas fa-seedling"></i>
+                                    </div>
+                                    <div class="level-title">Principiante</div>
+                                    <div class="level-description">Empezando desde cero</div>
+                                </div>
+                                <div class="level-card" data-level="intermedio">
+                                    <div class="level-icon">
+                                        <i class="fas fa-tree"></i>
+                                    </div>
+                                    <div class="level-title">Intermedio</div>
+                                    <div class="level-description">Tengo conocimientos básicos</div>
+                                </div>
+                                <div class="level-card" data-level="avanzado">
+                                    <div class="level-icon">
+                                        <i class="fas fa-mountain"></i>
+                                    </div>
+                                    <div class="level-title">Avanzado</div>
+                                    <div class="level-description">Quiero profundizar</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="user_level" id="user_level" value="principiante">
+                        </div>
+
+                        <!-- Interests Selection -->
+                        <div class="form-section">
+                            <div class="section-header-with-number">
+                                <div class="section-number">3</div>
+                                <h3 class="section-title-modern">Áreas de interés (opcional)</h3>
+                            </div>
+                            <p class="section-description">Selecciona tus intereses para personalizar ejemplos y contenido</p>
+                            <div class="interests-grid">
+                                <div class="interest-tag" data-interest="Tecnología">
+                                    <i class="fas fa-laptop-code interest-icon"></i>
+                                    Tecnología
+                                </div>
+                                <div class="interest-tag" data-interest="Ciencia">
+                                    <i class="fas fa-atom interest-icon"></i>
+                                    Ciencia
+                                </div>
+                                <div class="interest-tag" data-interest="Negocios">
+                                    <i class="fas fa-briefcase interest-icon"></i>
+                                    Negocios
+                                </div>
+                                <div class="interest-tag" data-interest="Arte">
+                                    <i class="fas fa-palette interest-icon"></i>
+                                    Arte
+                                </div>
+                                <div class="interest-tag" data-interest="Salud">
+                                    <i class="fas fa-heartbeat interest-icon"></i>
+                                    Salud
+                                </div>
+                                <div class="interest-tag" data-interest="Deportes">
+                                    <i class="fas fa-futbol interest-icon"></i>
+                                    Deportes
+                                </div>
+                                <div class="interest-tag" data-interest="Educación">
+                                    <i class="fas fa-graduation-cap interest-icon"></i>
+                                    Educación
+                                </div>
+                                <div class="interest-tag" data-interest="Marketing">
+                                    <i class="fas fa-bullhorn interest-icon"></i>
+                                    Marketing
+                                </div>
+                            </div>
+                            <input type="hidden" name="user_interests" id="user_interests" value="[]">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="submit-section">
+                        <button type="submit" class="btn-create-cursia">
+                            <i class="fas fa-star"></i>
+                            Crear Curso con IA
+                        </button>
+                    </div>
+                </form>
             {% endif %}
 
             <!-- Back to Dashboard -->
-            <div class="text-center mt-4">
-                <a href="{% url 'users:dashboard' %}" class="text-muted text-decoration-none">
-                    <i class="fas fa-arrow-left me-1"></i>
+            <div class="back-link">
+                <a href="{% url 'users:dashboard' %}">
+                    <i class="fas fa-arrow-left"></i>
                     Volver al Dashboard
                 </a>
             </div>
@@ -194,61 +612,105 @@
     </div>
 </div>
 
-<style>
-.level-option-card {
-    height: 100%;
-}
-
-.level-option-card .btn {
-    border-radius: 15px;
-    transition: all 0.3s ease;
-}
-
-.level-option-card .btn-check:checked + .btn {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
-}
-
-.interests-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.75rem;
-}
-
-.interest-checkbox .btn {
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    text-align: left;
-}
-
-.interest-checkbox .btn-check:checked + .btn {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    transform: translateY(-1px);
-}
-
-.form-control-lg {
-    border-radius: 12px;
-    border: 2px solid var(--border-light);
-    transition: all 0.3s ease;
-}
-
-.form-control-lg:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
-}
-</style>
-
 <script>
-// Handle interests selection
-document.querySelectorAll('input[name="interests"]').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const selectedInterests = Array.from(document.querySelectorAll('input[name="interests"]:checked'))
-            .map(cb => cb.value);
-        document.getElementById('user_interests').value = JSON.stringify(selectedInterests);
+document.addEventListener('DOMContentLoaded', function() {
+    // Ejemplos rotativos para el placeholder
+    const promptInput = document.getElementById('user_prompt');
+    const examples = [
+        "Machine Learning para principiantes con Python y casos prácticos",
+        "Diseño UX/UI desde cero: wireframes, prototipos y herramientas",
+        "Marketing Digital: SEO, SEM, redes sociales y analytics",
+        "Desarrollo Web Full Stack con JavaScript moderno",
+        "Fotografía profesional: técnicas, composición y edición",
+        "Inversiones y finanzas personales para jóvenes",
+        "Psicología aplicada al liderazgo empresarial",
+        "Cocina internacional: técnicas básicas y recetas avanzadas",
+        "Idioma inglés conversacional para viajeros",
+        "Yoga y mindfulness para reducir el estrés laboral",
+        "Excel avanzado para análisis de datos empresariales",
+        "Historia del arte contemporáneo y movimientos artísticos",
+        "Emprendimiento digital: de la idea al negocio rentable",
+        "Escritura creativa: narrativa, personajes y diálogos"
+    ];
+    
+    let currentIndex = 0;
+    
+    function rotateExamples() {
+        if (promptInput.value === '' && document.activeElement !== promptInput) {
+            promptInput.placeholder = examples[currentIndex];
+            currentIndex = (currentIndex + 1) % examples.length;
+        }
+    }
+    
+    // Iniciar rotación de ejemplos
+    setInterval(rotateExamples, 3000);
+    
+    // Detener rotación cuando el usuario está escribiendo
+    promptInput.addEventListener('focus', function() {
+        this.placeholder = "Describe el tema que quieres aprender...";
     });
+    
+    promptInput.addEventListener('blur', function() {
+        if (this.value === '') {
+            rotateExamples();
+        }
+    });
+
+    // Level selection
+    const levelCards = document.querySelectorAll('.level-card');
+    const userLevelInput = document.getElementById('user_level');
+    
+    levelCards.forEach(card => {
+        card.addEventListener('click', function() {
+            levelCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            userLevelInput.value = this.dataset.level;
+        });
+    });
+    
+    // Interest selection
+    const interestTags = document.querySelectorAll('.interest-tag');
+    const userInterestsInput = document.getElementById('user_interests');
+    let selectedInterests = [];
+    
+    interestTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            const interest = this.dataset.interest;
+            
+            if (this.classList.contains('selected')) {
+                this.classList.remove('selected');
+                selectedInterests = selectedInterests.filter(i => i !== interest);
+            } else {
+                this.classList.add('selected');
+                selectedInterests.push(interest);
+            }
+            
+            userInterestsInput.value = JSON.stringify(selectedInterests);
+        });
+    });
+    
+    // Form input animations
+    const inputs = document.querySelectorAll('.form-control-modern');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Smooth scroll to form sections on invalid input
+    const form = document.getElementById('courseForm');
+    if (form) {
+        form.addEventListener('invalid', function(e) {
+            e.target.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }, true);
+    }
 });
 </script>
 {% endblock %} 

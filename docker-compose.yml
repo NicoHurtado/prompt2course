@@ -6,6 +6,7 @@ services:
     container_name: p2c_web
     command: ["/entrypoint.sh"]
     volumes:
+      - .:/app
       - ./logs:/app/logs
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
